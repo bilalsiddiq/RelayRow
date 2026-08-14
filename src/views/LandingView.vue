@@ -2,8 +2,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useBrandingStore } from '@/stores/branding'
+import { useAuthStore } from '@/stores/auth'
 
 const brandingStore = useBrandingStore()
+const auth = useAuthStore()
 
 // Rotating 3 Headings for Hero Title
 const rotatingHeadings = [
@@ -180,9 +182,25 @@ function toggleFaq(idx) {
         </nav>
 
         <div class="nav-actions">
-          <RouterLink to="/login" class="btn btn-ghost">Sign In</RouterLink>
-          <RouterLink to="/inbox" class="btn btn-gradient">Launch App →</RouterLink>
-          <RouterLink to="/admin" class="btn btn-outline-sm">Admin</RouterLink>
+          <template v-if="auth.user">
+            <span class="user-pill font-mono text-xs text-white/70 bg-black/40 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>{{ auth.user.email }}</span>
+            </span>
+            <RouterLink to="/inbox" class="btn btn-gradient">
+              Go to Inbox & Dashboard →
+            </RouterLink>
+            <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="btn btn-outline-sm">
+              👑 Admin Panel
+            </RouterLink>
+            <button @click="auth.signOut()" class="btn btn-ghost">
+              Sign Out
+            </button>
+          </template>
+          <template v-else>
+            <RouterLink to="/login" class="btn btn-ghost">Sign In</RouterLink>
+            <RouterLink to="/inbox" class="btn btn-gradient">Launch App →</RouterLink>
+          </template>
         </div>
       </div>
     </header>
@@ -306,12 +324,22 @@ function toggleFaq(idx) {
         </p>
 
         <div class="hero-cta-group">
-          <RouterLink to="/login" class="btn btn-primary-lg glow-effect">
-            Start Free Trial
-          </RouterLink>
-          <a href="#playground" class="btn btn-secondary-lg">
-            Try Interactive AI Demo
-          </a>
+          <template v-if="auth.user">
+            <RouterLink to="/inbox" class="btn btn-primary-lg glow-effect">
+              Go to Inbox & Dashboard →
+            </RouterLink>
+            <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="btn btn-secondary-lg">
+              👑 Open Super Admin Console
+            </RouterLink>
+          </template>
+          <template v-else>
+            <RouterLink to="/login" class="btn btn-primary-lg glow-effect">
+              Start Free Trial
+            </RouterLink>
+            <a href="#playground" class="btn btn-secondary-lg">
+              Try Interactive AI Demo
+            </a>
+          </template>
         </div>
 
         <!-- Metrics Banner -->

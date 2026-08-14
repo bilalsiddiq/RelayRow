@@ -15,8 +15,8 @@ onMounted(() => {
 
 <template>
   <div id="xe-app">
-    <!-- Top bar -->
-    <header class="xe-header" v-if="auth.user">
+    <!-- Top bar (Hidden on landing page root to prevent double header stack) -->
+    <header class="xe-header" v-if="auth.user && $route.path !== '/'">
       <nav class="xe-nav">
         <RouterLink to="/inbox" class="xe-nav-brand">
           <div v-if="branding.logoSvg" v-html="branding.logoSvg" class="rr-logo-svg"></div>
