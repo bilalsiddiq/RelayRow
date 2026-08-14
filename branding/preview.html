@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RelayRow — logo proposal</title>
+<style>
+  :root { --ink:#020617; --surface:#0F172A; --paper:#F8FAFC; --line:#1E293B; --muted:#94A3B8; --accent:#6366F1; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink); color:var(--paper);
+         font:16px/1.6 Inter,"Segoe UI",system-ui,-apple-system,sans-serif; padding:48px 32px 80px; }
+  .wrap { max-width:960px; margin:0 auto; }
+  h1 { font-size:28px; font-weight:600; letter-spacing:-.4px; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 40px; }
+  h2 { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+       font-weight:600; margin:48px 0 16px; border-top:1px solid var(--line); padding-top:16px; }
+  .row { display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px;
+          padding:24px; display:flex; flex-direction:column; gap:14px; align-items:center; }
+  .card.light { background:var(--paper); border-color:#E2E8F0; }
+  .cap { font-size:12px; color:var(--muted); }
+  .card.light .cap { color:#64748B; }
+  .sizes { display:flex; gap:24px; align-items:flex-end; }
+  code { background:#0B1224; border:1px solid var(--line); border-radius:6px; padding:2px 6px; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RelayRow — brand assets</h1>
+  <p class="sub">“Relay Rows”, approved 2026-08-14. Everything below is inline SVG at real scale.
+     Rules for applying it live in <code>BRAND_BRIEF.md</code>.</p>
+
+  <h2>The mark</h2>
+  <div class="row">
+    <div class="card">
+      <img src="logo/relayrow-mark.svg" width="96" height="96" alt="">
+      <span class="cap">mark on dark</span>
+    </div>
+    <div class="card light">
+      <img src="logo/relayrow-mark.svg" width="96" height="96" alt="">
+      <span class="cap">mark on light</span>
+    </div>
+    <div class="card">
+      <img src="logo/relayrow-mark-tile.svg" width="96" height="96" alt="">
+      <span class="cap">app icon / avatar</span>
+    </div>
+    <div class="card" style="color:#22D3EE">
+      <img src="logo/relayrow-mark-mono.svg" width="96" height="96" alt="">
+      <span class="cap">mono (currentColor)</span>
+    </div>
+  </div>
+
+  <h2>Lockups</h2>
+  <div class="row">
+    <div class="card"><img src="logo/relayrow-lockup-dark.svg" width="300" alt=""><span class="cap">on dark</span></div>
+    <div class="card light"><img src="logo/relayrow-lockup-light.svg" width="300" alt=""><span class="cap">on light</span></div>
+  </div>
+
+  <h2>It has to survive small</h2>
+  <div class="card" style="align-items:flex-start">
+    <div class="sizes">
+      <img src="favicon.svg" width="16" height="16" alt=""><img src="favicon.svg" width="24" height="24" alt="">
+      <img src="favicon.svg" width="32" height="32" alt=""><img src="favicon.svg" width="48" height="48" alt="">
+      <img src="favicon.svg" width="64" height="64" alt="">
+    </div>
+    <span class="cap">favicon.svg at 16 / 24 / 32 / 48 / 64 px</span>
+  </div>
+
+  <h2>Palette</h2>
+  <div class="row">
+    <div class="card" style="background:#6366F1"><span class="cap" style="color:#fff">#6366F1 indigo</span></div>
+    <div class="card" style="background:#818CF8"><span class="cap" style="color:#0B1020">#818CF8 indigo light</span></div>
+    <div class="card" style="background:#22D3EE"><span class="cap" style="color:#0B1020">#22D3EE cyan signal</span></div>
+    <div class="card" style="background:#0F172A"><span class="cap">#0F172A surface</span></div>
+    <div class="card" style="background:#020617"><span class="cap">#020617 ink</span></div>
+  </div>
+
+  <h2>Wiring it up</h2>
+  <p>Copy <code>branding/favicon.svg</code> to <code>public/favicon.svg</code>, then in <code>index.html</code>
+     replace the inline emoji data-URI with <code>&lt;link rel="icon" type="image/svg+xml" href="/favicon.svg"&gt;</code>.</p>
+</div>
+</body>
+</html>

@@ -12,7 +12,9 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: '/inbox',
+      name: 'landing',
+      component: () => import('@/views/LandingView.vue'),
+      meta: { public: true },
     },
     {
       path: '/inbox',
@@ -21,8 +23,37 @@ const router = createRouter({
     },
     {
       path: '/admin',
-      name: 'admin',
-      component: () => import('@/views/admin/AdminInboxView.vue'),
+      redirect: '/admin/domains',
+    },
+    {
+      path: '/admin/domains',
+      name: 'admin-domains',
+      component: () => import('@/views/admin/DomainsView.vue'),
+    },
+    {
+      path: '/admin/tenants',
+      name: 'admin-tenants',
+      component: () => import('@/views/admin/TenantsView.vue'),
+    },
+    {
+      path: '/admin/aura',
+      name: 'admin-aura',
+      component: () => import('@/views/admin/AuraView.vue'),
+    },
+    {
+      path: '/admin/design',
+      name: 'admin-design',
+      component: () => import('@/views/admin/DesignSystemView.vue'),
+    },
+    {
+      path: '/admin/logs',
+      name: 'admin-logs',
+      component: () => import('@/views/admin/LogsView.vue'),
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/views/tenant/TenantSettingsView.vue'),
     },
   ],
 })

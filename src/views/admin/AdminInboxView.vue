@@ -9,8 +9,8 @@
 // Each domain carries its OWN Resend key (write-only: it goes into Supabase Vault
 // and only a masked tail comes back) and its own webhook token, so a second product
 // can share this deployment on a different Resend account.
-import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useBrandingStore } from '@/stores/branding'
 import {
   listDomains, saveDomain, deleteDomain, setDomainKey, clearDomainKey,
@@ -23,7 +23,12 @@ import {
   getAiConfig, saveAiConfig, listAiKnowledge, saveAiKnowledge, deleteAiKnowledge,
   AI_PROVIDER_CATALOG, aiCatalogFor,
   listTenants, saveTenant, deleteTenant, listTenantCapacities, saveTenantCapacity,
+  listMembershipPlans, saveMembershipPlan, deleteMembershipPlan,
+  getAuraAiConfig, saveAuraAiConfig, addTenantAiCredits, listTenantSubscriptions,
 } from '@/services/inbox'
+
+const route = useRoute()
+const router = useRouter()
 
 // ── HOST-APP BINDINGS — routes, tenant label, brand samples; the only app
 // coupling in this view. A port edits this block (and nothing below it).
@@ -38,11 +43,35 @@ const HOST = {
 }
 
 const brandingStore = useBrandingStore()
-const tab = ref('design') // design | tenants | domains | addresses | ai | log
+const tab = ref('domains') // domains | addresses | tenants | plans | aura | ai | design | log
 const loading = ref(true)
 const error = ref('')
 const notice = ref('')
 const busy = ref('')
+
+onMounted(async () => {
+  const sec = route.query.section || 'domains'
+  pick(sec)
+})
+
+watch(() => route.query.section, (newSec) => {
+  if (newSec && newSec !== tab.value) {
+    pick(newSec)
+  }
+})
+
+function pick(t) {
+  tab.value = t
+  if (route.query.section !== t) {
+    router.replace({ query: { ...route.query, section: t } })
+  }
+  if (t === 'addresses') loadAddresses()
+  if (t === 'tenants') loadTenantsData()
+  if (t === 'plans') loadPlansData()
+  if (t === 'aura') { loadAuraData(); loadTenantsData() }
+  if (t === 'log') loadLog()
+  if (t === 'ai' && !aiCfg.value) loadAi()
+}
 
 const domains = ref([])
 const status = ref(null)
@@ -73,6 +102,87 @@ const newTenant = ref({
   max_storage_gb: 10,
   max_seats: 20,
 })
+
+// Membership Plans state
+const plans = ref([])
+const newPlan = ref({
+  name: '',
+  slug: '',
+  price_monthly: 29,
+  price_yearly: 290,
+  max_domains: 5,
+  max_inboxes: 50,
+  max_seats: 10,
+  max_storage_gb: 10,
+  monthly_ai_credits: 2000,
+  features_text: '["3 Domains", "20 Inboxes", "2,000 AI Credits", "5 Team Seats"]'
+})
+
+// AURA Module state
+const auraConfig = ref({
+  provider: 'openai',
+  model: 'gpt-4o-mini',
+  credit_rate_triage: 1,
+  credit_rate_reply: 2,
+  is_active: true
+})
+const topUpAmount = ref({})
+
+async function loadPlansData() {
+  plans.value = await listMembershipPlans()
+}
+
+async function loadAuraData() {
+  auraConfig.value = await getAuraAiConfig()
+}
+
+async function createMembershipPlan() {
+  if (!newPlan.value.name.trim() || !newPlan.value.slug.trim()) return
+  await guard('add-plan', async () => {
+    let featJson = []
+    try { featJson = JSON.parse(newPlan.value.features_text) } catch { featJson = [newPlan.value.features_text] }
+    await saveMembershipPlan({
+      name: newPlan.value.name.trim(),
+      slug: newPlan.value.slug.trim().toLowerCase(),
+      price_monthly: Number(newPlan.value.price_monthly),
+      price_yearly: Number(newPlan.value.price_yearly),
+      max_domains: Number(newPlan.value.max_domains),
+      max_inboxes: Number(newPlan.value.max_inboxes),
+      max_seats: Number(newPlan.value.max_seats),
+      max_storage_gb: Number(newPlan.value.max_storage_gb),
+      monthly_ai_credits: Number(newPlan.value.monthly_ai_credits),
+      features: featJson,
+    })
+    newPlan.value = { name: '', slug: '', price_monthly: 29, price_yearly: 290, max_domains: 5, max_inboxes: 50, max_seats: 10, max_storage_gb: 10, monthly_ai_credits: 2000, features_text: '' }
+    await loadPlansData()
+    flash('Membership Plan saved!')
+  })
+}
+
+async function removePlan(p) {
+  if (!confirm(`Delete plan "${p.name}"?`)) return
+  await guard(`del-plan-${p.id}`, async () => {
+    await deleteMembershipPlan(p.id)
+    await loadPlansData()
+    flash('Plan deleted.')
+  })
+}
+
+async function saveAuraSettings() {
+  await guard('save-aura', async () => {
+    await saveAuraAiConfig(auraConfig.value)
+    flash('Platform AURA AI configuration updated!')
+  })
+}
+
+async function topUpCredits(tenantId) {
+  const amount = Number(topUpAmount.value[tenantId] || 1000)
+  await guard(`topup-${tenantId}`, async () => {
+    await addTenantAiCredits(tenantId, amount)
+    topUpAmount.value[tenantId] = ''
+    flash(`Added ${amount} AURA AI credits to tenant.`)
+  })
+}
 
 async function applyPresetTheme(presetId) {
   brandEdit.value.themePreset = presetId
@@ -505,18 +615,6 @@ async function removeForward(f) {
   })
 }
 
-async function loadLog() {
-  await guard('log', async () => { log.value = await listInboxLog(80) })
-}
-
-function pick(t) {
-  tab.value = t
-  if (t === 'addresses') loadAddresses()
-  if (t === 'tenants') loadTenantsData()
-  if (t === 'log') loadLog()
-  if (t === 'ai' && !aiCfg.value) loadAi()
-}
-
 const fmt = (s) => (s ? new Date(s).toLocaleString() : '—')
 </script>
 
@@ -524,20 +622,25 @@ const fmt = (s) => (s ? new Date(s).toLocaleString() : '—')
   <section class="mx-auto max-w-5xl px-6 py-10">
     <header class="flex flex-wrap items-end gap-4">
       <div>
-        <h2 class="text-2xl font-bold">RelayRow Management Console</h2>
+        <h2 class="text-2xl font-bold">RelayRow Super Admin Panel</h2>
         <p class="mt-1 text-sm text-white/55">
-          Super Admin Control — Design System, Branding, Tenant Capacities, Domains, & AI Automation.
+          Platform Governance — Domains, Multi-Tenant Accounts, Membership Plans, AURA AI Engine & Design System.
         </p>
       </div>
       <RouterLink :to="HOST.inboxRoute" class="pill ml-auto">Open inbox →</RouterLink>
     </header>
 
     <div class="tabs">
-      <button v-for="t in ['design', 'tenants', 'domains', 'addresses', 'ai', 'log']" :key="t"
+      <button v-for="t in ['domains', 'addresses', 'tenants', 'plans', 'aura', 'ai', 'design', 'log']" :key="t"
         class="tab" :class="{ on: tab === t }" @click="pick(t)">
-        <template v-if="t === 'design'">🎨 Design System</template>
-        <template v-else-if="t === 'tenants'">🏢 Tenants & Capacities</template>
+        <template v-if="t === 'domains'">🌐 Domains</template>
+        <template v-else-if="t === 'addresses'">✉️ Email Addresses</template>
+        <template v-else-if="t === 'tenants'">🏢 Tenants & Accounts</template>
+        <template v-else-if="t === 'plans'">💳 Membership Plans</template>
+        <template v-else-if="t === 'aura'">✨ AURA AI Engine</template>
         <template v-else-if="t === 'ai'">🤖 AI Automation</template>
+        <template v-else-if="t === 'design'">🎨 Design System & Branding</template>
+        <template v-else-if="t === 'log'">📜 Audit Log</template>
         <template v-else>{{ t }}</template>
       </button>
     </div>
@@ -545,6 +648,86 @@ const fmt = (s) => (s ? new Date(s).toLocaleString() : '—')
     <p v-if="error" class="err">{{ error }}</p>
     <p v-if="notice" class="ok">{{ notice }}</p>
     <p v-if="loading" class="muted">Loading…</p>
+
+    <!-- ── MEMBERSHIP PLANS & PRICING ───────────────────────────────────── -->
+    <div v-else-if="tab === 'plans'" class="panel">
+      <div class="sub">
+        <h3>Create Membership Plan</h3>
+        <p class="muted text-xs mb-2">Define subscription plans, prices, domain/inbox/seat quotas, and bundled monthly AURA AI credits.</p>
+        <div class="grid2">
+          <label class="f"><span>Plan Name</span><input v-model="newPlan.name" placeholder="e.g. Pro Business" /></label>
+          <label class="f"><span>Slug</span><input v-model="newPlan.slug" placeholder="e.g. pro" /></label>
+          <label class="f"><span>Monthly Price ($)</span><input v-model="newPlan.price_monthly" type="number" /></label>
+          <label class="f"><span>Yearly Price ($)</span><input v-model="newPlan.price_yearly" type="number" /></label>
+          <label class="f"><span>Max Domains</span><input v-model="newPlan.max_domains" type="number" /></label>
+          <label class="f"><span>Max Inboxes</span><input v-model="newPlan.max_inboxes" type="number" /></label>
+          <label class="f"><span>Max Seats</span><input v-model="newPlan.max_seats" type="number" /></label>
+          <label class="f"><span>Monthly AI Credits</span><input v-model="newPlan.monthly_ai_credits" type="number" /></label>
+        </div>
+        <button class="zx-btn sm mt-2" :disabled="busy === 'add-plan'" @click="createMembershipPlan">
+          Save Membership Plan
+        </button>
+      </div>
+
+      <div class="grid2 mt-4">
+        <div v-for="p in plans" :key="p.id" class="card">
+          <div class="row items-center justify-between">
+            <h4 class="font-bold text-lg">{{ p.name }}</h4>
+            <span class="badge good">${{ p.price_monthly }}/mo</span>
+          </div>
+          <p class="muted text-xs mt-1">Slug: <code>{{ p.slug }}</code> | Yearly: ${{ p.price_yearly }}/yr</p>
+          <div class="grid2 text-xs mt-3 bg-black/20 p-2 rounded">
+            <div>Domains: <strong>{{ p.max_domains }}</strong></div>
+            <div>Inboxes: <strong>{{ p.max_inboxes }}</strong></div>
+            <div>Seats: <strong>{{ p.max_seats }}</strong></div>
+            <div>AI Credits: <strong>{{ p.monthly_ai_credits?.toLocaleString() }}</strong></div>
+          </div>
+          <button class="btn-text danger sm mt-3" @click="removePlan(p)">Delete Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLATFORM AURA AI ENGINE ────────────────────────────────────── -->
+    <div v-else-if="tab === 'aura'" class="panel">
+      <div class="sub">
+        <h3>Platform-Wide AURA AI Module (ZEXPO Architecture)</h3>
+        <p class="muted text-xs mb-2">
+          Super Admin sets platform LLM API keys. Member accounts do NOT supply their own API keys — they consume platform AURA credits.
+        </p>
+        <div class="grid2">
+          <label class="f"><span>AI Provider</span>
+            <select v-model="auraConfig.provider">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="groq">Groq</option>
+            </select>
+          </label>
+          <label class="f"><span>Default Model</span>
+            <input v-model="auraConfig.model" placeholder="gpt-4o-mini / claude-3-5-sonnet" />
+          </label>
+          <label class="f"><span>Triage Rate (Credits/Email)</span>
+            <input v-model="auraConfig.credit_rate_triage" type="number" />
+          </label>
+          <label class="f"><span>Reply Draft Rate (Credits/Draft)</span>
+            <input v-model="auraConfig.credit_rate_reply" type="number" />
+          </label>
+        </div>
+        <button class="zx-btn sm mt-2" :disabled="busy === 'save-aura'" @click="saveAuraSettings">
+          Save Platform AURA Engine Config
+        </button>
+      </div>
+
+      <div class="sub mt-4">
+        <h3>Tenant AI Credit Top-Up</h3>
+        <p class="muted text-xs mb-2">Add bonus AI credits to member tenant accounts.</p>
+        <div v-for="t in tenants" :key="t.id" class="row items-center gap-3 p-2 bg-black/20 rounded mt-2">
+          <strong>{{ t.name }}</strong> (<code>{{ t.slug }}</code>)
+          <input v-model="topUpAmount[t.id]" type="number" placeholder="1000" class="w-24 text-xs p-1" />
+          <button class="zx-btn sm" @click="topUpCredits(t.id)">+ Add Credits</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ── DOMAINS ───────────────────────────────────────────────────────── -->
     <div v-else-if="tab === 'domains'" class="panel">
@@ -1001,8 +1184,75 @@ const fmt = (s) => (s ? new Date(s).toLocaleString() : '—')
       </div>
     </div>
 
+    <!-- ── DESIGN SYSTEM & BRANDING PORTAL ──────────────────────────────── -->
+    <div v-else-if="tab === 'design'" class="panel">
+      <div class="sub">
+        <h3>🎨 RelayRow Design System & White-Label Branding Portal</h3>
+        <p class="muted text-xs mb-3">
+          Configure runtime branding, theme presets, logo marks, typography, and color tokens. Changes automatically persist to Supabase <code>app_branding</code> table and update the client in real-time.
+        </p>
+
+        <!-- Theme Presets -->
+        <h4 class="font-bold text-sm mb-2">Preset Color Themes</h4>
+        <div class="grid flex-wrap gap-3 mb-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <div v-for="preset in brandingStore.THEME_PRESETS" :key="preset.id"
+            class="preset-card cursor-pointer transition-all border p-3 rounded-lg"
+            :class="{ active: brandingStore.branding.themePreset === preset.id }"
+            @click="brandingStore.updateBranding({ themePreset: preset.id })">
+            <div class="flex items-center justify-between w-full mb-2">
+              <span class="preset-name">{{ preset.name }}</span>
+              <span v-if="brandingStore.branding.themePreset === preset.id" class="preview-badge">Active</span>
+            </div>
+            <div class="flex gap-1.5 items-center">
+              <span class="preset-color" :style="{ background: preset.accentColor }" title="Accent"></span>
+              <span class="preset-color" :style="{ background: preset.bgColor }" title="Background"></span>
+              <span class="preset-color" :style="{ background: preset.surfaceColor }" title="Surface"></span>
+              <span class="preset-color" :style="{ background: preset.textColor }" title="Text"></span>
+              <span class="preset-color" :style="{ background: preset.borderColor }" title="Border"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Brand Identity Form -->
+        <div class="grid2 gap-4 mt-4">
+          <label class="f"><span>Application Name</span><input v-model="brandingStore.branding.appName" placeholder="RelayRow" /></label>
+          <label class="f"><span>Application URL</span><input v-model="brandingStore.branding.appUrl" placeholder="https://relayrow.com" /></label>
+          <label class="f"><span>Logo Image URL (Optional)</span><input v-model="brandingStore.branding.logoUrl" placeholder="https://example.com/logo.png" /></label>
+          <label class="f"><span>Logo SVG Code (Inline SVG)</span><input v-model="brandingStore.branding.logoSvg" placeholder="<svg ...></svg>" /></label>
+        </div>
+        <button class="pill mt-3" @click="brandingStore.updateBranding(brandingStore.branding)">
+          Save Custom Branding To Database
+        </button>
+      </div>
+
+      <!-- Live Component & Token Inspector Sandbox -->
+      <div class="sub mt-6">
+        <h3>Live Design System Tokens & Component Sandbox</h3>
+        <p class="muted text-xs mb-3">Live preview of RelayRow buttons, form inputs, badge chips, and layout surfaces under the currently active theme.</p>
+        
+        <div class="theme-preview-box grid2 gap-4">
+          <div class="p-3 rounded-lg bg-black/20 border border-white/10">
+            <h5 class="text-xs font-bold text-white/50 uppercase tracking-wider mb-2">Interactive Buttons</h5>
+            <div class="flex flex-wrap gap-2">
+              <button class="btn primary">Primary Action</button>
+              <button class="btn secondary">Secondary Pill</button>
+              <button class="btn danger">Danger Action</button>
+            </div>
+          </div>
+          <div class="p-3 rounded-lg bg-black/20 border border-white/10">
+            <h5 class="text-xs font-bold text-white/50 uppercase tracking-wider mb-2">Status Chips & Badges</h5>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge good">Verified</span>
+              <span class="badge bad">Pending MX</span>
+              <span class="preview-badge">Active Theme</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── LOG ───────────────────────────────────────────────────────────── -->
-    <div v-else class="panel">
+    <div v-else-if="tab === 'log'" class="panel">
       <div class="row mb-3">
         <button class="zx-btn ghost sm" :disabled="busy === 'log'" @click="loadLog">Refresh</button>
         <span class="muted text-xs self-center">
@@ -1025,101 +1275,125 @@ const fmt = (s) => (s ? new Date(s).toLocaleString() : '—')
 </template>
 
 <style scoped>
-.muted { color: rgba(226,238,255,.5); }
-.lnk { color: #9df5e2; text-decoration: underline; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
-.mini { font-size: 12px; margin-top: 6px; }
-.good-t { color: #86d7b0; } .bad-t { color: #ff9ea1; }
-.tabs { display: flex; gap: 6px; margin: 22px 0 16px; }
-.tab { padding: 7px 15px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer;
-  text-transform: capitalize; background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.1); color: rgba(226,238,255,.7); }
-.tab.on { background: rgba(16,185,129,.18); border-color: rgba(94,234,212,.45); color: #9df5e2; }
-.panel { padding: 20px; border-radius: 14px; background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.08); }
-.sub { margin: 18px 0; padding: 16px; border-radius: 12px; background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.07); }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 7px 15px;
+  border-radius: var(--xe-radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: capitalize;
+  background: var(--xe-bg-hover);
+  border: 1px solid var(--rr-border);
+  color: var(--xe-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.tab.on { background: var(--rr-accent-transparent); border-color: var(--rr-accent); color: var(--rr-accent); }
+.panel { padding: 20px; border-radius: var(--xe-radius-lg); background: var(--rr-bg-surface);
+  border: 1px solid var(--rr-border); }
+.sub { margin: 18px 0; padding: 16px; border-radius: var(--xe-radius-lg); background: var(--xe-bg-elevated);
+  border: 1px solid var(--rr-border); }
 .sub h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-.card { margin-top: 14px; padding: 15px; border-radius: 12px; background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.08); }
-.detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.08); }
+.card { margin-top: 14px; padding: 15px; border-radius: var(--xe-radius-lg); background: var(--xe-bg-elevated);
+  border: 1px solid var(--rr-border); }
+.detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rr-border); }
 /* signature editor: editor left, live preview right; stacks when narrow */
 .sigcols { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 4px; }
 .sigframe { width: 100%; height: 160px; border: 0; border-radius: 10px; background: #fff; }
 .sigpre { white-space: pre-wrap; margin: 0; min-height: 120px; padding: 10px 12px; border-radius: 10px;
-  font: 12.5px/1.6 ui-monospace, Consolas, monospace; color: rgba(226,238,255,.8);
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+  font: 12.5px/1.6 ui-monospace, Consolas, monospace; color: var(--rr-text);
+  background: var(--rr-bg); border: 1px solid var(--rr-border); }
 .detail h4 { font-size: 12px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .04em; color: rgba(226,238,255,.6); margin-bottom: 4px; }
+  letter-spacing: .04em; color: var(--xe-text-muted); margin-bottom: 4px; }
 .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
-.badge.good { background: rgba(63,143,107,.22); color: #86d7b0; }
-.badge.bad { background: rgba(199,154,62,.18); color: #e3c07a; }
+.badge.good { background: rgba(16,185,129,.15); color: var(--xe-success); }
+.badge.bad { background: rgba(245,158,11,.15); color: var(--xe-warning); }
 .warn { margin-bottom: 16px; padding: 11px 14px; border-radius: 11px; font-size: 13px;
-  color: rgba(255,225,180,.9); background: rgba(199,154,62,.1); border: 1px solid rgba(199,154,62,.3); }
+  color: var(--xe-warning); background: rgba(245,158,11,.1); border: 1px solid var(--rr-border); }
 /* Sticky: an action deep in the page (a seat grant, a forwarder) must surface its
    result where the admin is looking, not scrolled away at the top. */
 .err { margin-top: 14px; padding: 11px 14px; border-radius: 11px; font-size: 13px;
   position: sticky; top: 12px; z-index: 30; backdrop-filter: blur(6px);
-  color: #ff9ea1; background: rgba(60,16,18,.92); border: 1px solid rgba(229,72,77,.4); }
+  color: var(--xe-danger); background: rgba(239,68,68,.1); border: 1px solid var(--rr-border); }
 .ok { margin-top: 14px; padding: 11px 14px; border-radius: 11px; font-size: 13px;
   position: sticky; top: 12px; z-index: 30; backdrop-filter: blur(6px);
-  color: #86d7b0; background: rgba(14,42,30,.92); border: 1px solid rgba(63,143,107,.4); }
+  color: var(--xe-success); background: rgba(16,185,129,.1); border: 1px solid var(--rr-border); }
 .grid2 { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 .f { display: block; margin-bottom: 12px; }
-.f span { display: block; font-size: 12px; font-weight: 600; color: rgba(226,238,255,.55); margin-bottom: 5px; }
-.f input, .f select, input, select, .ta { background: var(--zx-field-bg, rgba(255,255,255,.05));
-  border: 1px solid var(--zx-field-border, rgba(255,255,255,.13)); color: #e7ecff; outline: none; }
-.f input, .f select { width: 100%; padding: 9px 12px; border-radius: 10px; font-size: 14px; }
-input { padding: 8px 11px; border-radius: 9px; font-size: 13px; }
-select { padding: 7px 10px; border-radius: 9px; font-size: 13px; }
-.f input:focus, input:focus { border-color: rgba(94,234,212,.5); }
+.f span { display: block; font-size: 12px; font-weight: 600; color: var(--xe-text-muted); margin-bottom: 5px; }
+.f input, .f select, input, select, .ta { background: var(--rr-bg);
+  border: 1px solid var(--rr-border); color: var(--rr-text); outline: none; }
+.f input, .f select { width: 100%; padding: 9px 12px; border-radius: var(--xe-radius); font-size: 14px; }
+input { padding: 8px 11px; border-radius: var(--xe-radius); font-size: 13px; }
+select { padding: 7px 10px; border-radius: var(--xe-radius); font-size: 13px; }
+.f input:focus, input:focus { border-color: var(--rr-accent); }
 .grow { flex: 1 1 220px; min-width: 0; }
 .num { width: 62px; }
-.ta { width: 100%; min-height: 70px; padding: 9px 12px; border-radius: 10px; font-size: 13px;
+.ta { width: 100%; min-height: 70px; padding: 9px 12px; border-radius: var(--xe-radius); font-size: 13px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .chk { display: inline-flex; align-items: center; gap: 5px; font-size: 12px;
-  color: rgba(226,238,255,.7); white-space: nowrap; }
+  color: var(--xe-text-muted); white-space: nowrap; }
 .chk input { width: auto; }
 .line { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
-  border-bottom: 1px solid rgba(255,255,255,.06); }
+  border-bottom: 1px solid var(--rr-border); }
 .line:last-child { border-bottom: 0; }
 .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; background: #6b7280; }
-.dot.stored, .dot.sent, .dot.forwarded, .dot.scanned { background: #3f8f6b; }
-.dot.error, .dot.send_failed, .dot.forward_failed, .dot.scan_failed { background: #e5484d; }
-.dot.dropped, .dot.duplicate { background: #c79a3e; }
-.pill { padding: 6px 12px; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  color: #e7ecff; text-decoration: none; white-space: nowrap; }
-.pill:hover { background: rgba(255,255,255,.11); }
-.pill.danger { color: #ff9ea1; border-color: rgba(229,72,77,.3); }
+.dot.stored, .dot.sent, .dot.forwarded, .dot.scanned { background: var(--xe-success); }
+.dot.error, .dot.send_failed, .dot.forward_failed, .dot.scan_failed { background: var(--xe-danger); }
+.dot.dropped, .dot.duplicate { background: var(--xe-warning); }
+.pill { padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--xe-bg-hover); border: 1px solid var(--rr-border);
+  color: var(--rr-text); text-decoration: none; white-space: nowrap; }
+.pill:hover { background: var(--rr-accent-transparent); }
+.pill.danger { color: var(--xe-danger); border-color: var(--rr-border); }
 
 /* ── RelayRow Design System Editor Styles ── */
 .desc { font-size: 13px; color: var(--xe-text-muted); margin-top: 4px; }
-.input-text { width: 100%; padding: 9px 12px; border-radius: 8px; font-size: 13px;
-  background: rgba(255,255,255,.05); border: 1px solid var(--rr-border, rgba(255,255,255,.12)); color: var(--rr-text); outline: none; }
+.input-text { width: 100%; padding: 9px 12px; border-radius: var(--xe-radius); font-size: 13px;
+  background: var(--rr-bg); border: 1px solid var(--rr-border); color: var(--rr-text); outline: none; }
 .input-text:focus { border-color: var(--rr-accent); }
 
-.preset-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px;
-  border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); cursor: pointer; transition: all 0.2s; }
-.preset-card:hover { border-color: var(--rr-accent); background: rgba(255,255,255,.08); }
+.preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  width: 100%;
+  border-radius: var(--xe-radius-lg);
+  background: var(--xe-bg-hover);
+  border: 1px solid var(--rr-border);
+  cursor: pointer;
+  transition: all var(--xe-transition);
+}
+.preset-card:hover { border-color: var(--rr-accent); background: var(--rr-accent-transparent); }
 .preset-card.active { border-color: var(--rr-accent); background: var(--rr-accent-transparent); }
-.preset-color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); }
-.preset-name { font-size: 11px; font-weight: 600; text-align: center; color: var(--xe-text); }
+.preset-color {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+.preset-name { font-size: 12px; font-weight: 600; text-align: left; color: var(--rr-text); }
 
 .color-picker { width: 34px; height: 34px; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: transparent; }
 
-.theme-preview-box { padding: 16px; border-radius: 12px; background: var(--rr-bg-surface); border: 1px solid var(--rr-border); }
-.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
-.btn.primary { background: var(--rr-accent); color: #fff; }
+.theme-preview-box { padding: 16px; border-radius: var(--xe-radius-lg); background: var(--rr-bg-surface); border: 1px solid var(--rr-border); }
+.btn { padding: 8px 16px; border-radius: var(--xe-radius); font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all var(--xe-transition); }
+.btn.primary { background: var(--rr-accent); color: #ffffff; }
 .btn.primary:hover { opacity: 0.9; }
-.btn.secondary { background: rgba(255,255,255,.08); color: var(--rr-text); border: 1px solid var(--rr-border); }
-.btn.danger { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
+.btn.secondary { background: var(--xe-bg-hover); color: var(--rr-text); border: 1px solid var(--rr-border); }
+.btn.danger { background: rgba(239,68,68,.15); color: var(--xe-danger); border: 1px solid var(--rr-border); }
 
-.primary-preview { background: var(--rr-accent); color: #fff; }
-.secondary-preview { background: rgba(255,255,255,.08); color: var(--rr-text); border: 1px solid var(--rr-border); }
+.primary-preview { background: var(--rr-accent); color: #ffffff; }
+.secondary-preview { background: var(--xe-bg-hover); color: var(--rr-text); border: 1px solid var(--rr-border); }
 .preview-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--rr-accent-transparent); color: var(--rr-accent); }
-.preview-input { padding: 6px 12px; border-radius: 8px; font-size: 12px; background: var(--rr-bg); border: 1px solid var(--rr-accent); color: var(--rr-text); }
+.preview-input { padding: 6px 12px; border-radius: var(--xe-radius); font-size: 12px; background: var(--rr-bg); border: 1px solid var(--rr-accent); color: var(--rr-text); }
 </style>
 

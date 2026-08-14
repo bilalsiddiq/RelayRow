@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="RelayRow">
+  <title>RelayRow mark — Relay Rows</title>
+  <defs>
+    <linearGradient id="rrGrad" x1="6" y1="38" x2="58" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <!-- rows -->
+  <rect x="6"  y="13" width="30" height="8" rx="4" fill="#6366F1" opacity=".38"/>
+  <rect x="6"  y="28" width="38" height="8" rx="4" fill="url(#rrGrad)"/>
+  <rect x="6"  y="43" width="22" height="8" rx="4" fill="#6366F1" opacity=".38"/>
+  <!-- the relayed packet, mid-flight -->
+  <circle cx="54" cy="32" r="4" fill="#22D3EE"/>
+</svg>

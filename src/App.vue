@@ -21,12 +21,33 @@ onMounted(() => {
         <RouterLink to="/inbox" class="xe-nav-brand">
           <div v-if="branding.logoSvg" v-html="branding.logoSvg" class="rr-logo-svg"></div>
           <img v-else-if="branding.logoUrl" :src="branding.logoUrl" alt="Logo" class="rr-logo-img" />
-          <span v-else class="xe-logo">⚡</span>
-          <span class="xe-name">{{ branding.appName }}</span>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 64" width="118" height="32" class="rr-logo-svg" role="img" aria-label="RelayRow">
+            <defs>
+              <linearGradient id="rrHdrA" x1="6" y1="38" x2="58" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#818CF8"/>
+                <stop offset="1" stop-color="#22D3EE"/>
+              </linearGradient>
+              <linearGradient id="rrHdrB" x1="150" y1="46" x2="220" y2="20" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#818CF8"/>
+                <stop offset="1" stop-color="#22D3EE"/>
+              </linearGradient>
+            </defs>
+            <rect x="6" y="13" width="30" height="8" rx="4" fill="#818CF8" opacity=".45"/>
+            <rect x="6" y="28" width="38" height="8" rx="4" fill="url(#rrHdrA)"/>
+            <rect x="6" y="43" width="22" height="8" rx="4" fill="#818CF8" opacity=".45"/>
+            <circle cx="54" cy="32" r="4" fill="#22D3EE"/>
+            <text x="78" y="43" font-family="Inter, system-ui, sans-serif" font-size="30" font-weight="600" letter-spacing="-.6" fill="var(--rr-text)">Relay<tspan fill="url(#rrHdrB)">Row</tspan></text>
+          </svg>
         </RouterLink>
         <div class="xe-nav-links">
           <RouterLink to="/inbox" active-class="active">Inbox</RouterLink>
-          <RouterLink to="/admin" active-class="active" v-if="auth.isSuperAdmin">Admin & Design System</RouterLink>
+          <template v-if="auth.isSuperAdmin">
+            <RouterLink to="/admin/domains" active-class="active">Domains & Mailboxes</RouterLink>
+            <RouterLink to="/admin/tenants" active-class="active">Tenants & Billing</RouterLink>
+            <RouterLink to="/admin/aura" active-class="active">✨ AURA AI Engine</RouterLink>
+            <RouterLink to="/admin/design" active-class="active">🎨 Design System</RouterLink>
+            <RouterLink to="/admin/logs" active-class="active">📜 System Logs</RouterLink>
+          </template>
         </div>
         <div class="xe-nav-right">
           <span class="xe-user-badge" v-if="auth.isSuperAdmin">👑 Super Admin</span>
@@ -112,11 +133,16 @@ html, body {
 .xe-nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 16px;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+
+.xe-nav::-webkit-scrollbar { display: none; }
 
 .xe-nav-brand {
   display: flex;
@@ -127,6 +153,7 @@ html, body {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .xe-logo {
@@ -143,6 +170,8 @@ html, body {
 .xe-nav-links {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .xe-nav-links a {
@@ -153,6 +182,8 @@ html, body {
   font-size: 13px;
   font-weight: 500;
   transition: all var(--xe-transition);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .xe-nav-links a:hover { color: var(--xe-text); background: var(--xe-bg-hover); }
@@ -163,6 +194,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .xe-user-badge {
@@ -172,7 +205,7 @@ html, body {
   border-radius: 20px;
   background: var(--rr-accent-transparent);
   color: var(--xe-accent);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  border: 1px solid var(--rr-accent-transparent);
 }
 
 .xe-user-email {
@@ -203,7 +236,7 @@ html, body {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 32px 24px 48px;
 }
 
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */

@@ -471,3 +471,113 @@ export const listTenantCapacities = async () => {
 
 export const saveTenantCapacity = (patch) => saveRow('tenant_capacities', patch)
 
+// ── membership plans (super admin) ─────────────────────────────────────────
+
+export const listMembershipPlans = async () => {
+  try {
+    const plans = await supabase.from('membership_plans').select('*').order('price_monthly', { ascending: true }).then(ok)
+    if (plans && plans.length) return plans
+  } catch (e) {
+    console.warn('Membership plans error:', e)
+  }
+  return [
+    { id: 'p1', name: 'Starter Plan', slug: 'starter', price_monthly: 29, price_yearly: 290, max_domains: 3, max_inboxes: 20, max_seats: 5, max_storage_gb: 10, monthly_ai_credits: 2000, features: ['3 Domains', '20 Inboxes', '2,000 AI Credits', '5 Team Seats'] },
+    { id: 'p2', name: 'Pro Business', slug: 'pro', price_monthly: 79, price_yearly: 790, max_domains: 10, max_inboxes: 100, max_seats: 25, max_storage_gb: 50, monthly_ai_credits: 10000, features: ['10 Domains', '100 Inboxes', '10,000 AI Credits', '25 Team Seats', 'Priority AURA Cascade'] },
+    { id: 'p3', name: 'Enterprise', slug: 'enterprise', price_monthly: 249, price_yearly: 2490, max_domains: 50, max_inboxes: 500, max_seats: 100, max_storage_gb: 250, monthly_ai_credits: 50000, features: ['50 Domains', '500 Inboxes', '50,000 AI Credits', '100 Team Seats', 'Dedicated Support'] },
+  ]
+}
+
+export const saveMembershipPlan = (patch) => saveRow('membership_plans', patch)
+export const deleteMembershipPlan = (id) => supabase.from('membership_plans').delete().eq('id', id).then(ok)
+
+// ── tenant subscriptions & AI credits ────────────────────────────────────────
+
+export const listTenantSubscriptions = async () => {
+  try {
+    const subs = await supabase.from('tenant_subscriptions').select('*, membership_plans(*)').then(ok)
+    if (subs && subs.length) return subs
+  } catch (e) {
+    console.warn('Tenant subscriptions error:', e)
+  }
+  return []
+}
+
+export const saveTenantSubscription = (patch) => saveRow('tenant_subscriptions', patch)
+
+export const addTenantAiCredits = async (tenant_id, creditsToAdd) => {
+  try {
+    const { data: sub } = await supabase.from('tenant_subscriptions').select('id, ai_credits_balance').eq('tenant_id', tenant_id).maybeSingle()
+    if (sub) {
+      const newBal = (sub.ai_credits_balance || 0) + Number(creditsToAdd)
+      return saveRow('tenant_subscriptions', { id: sub.id, ai_credits_balance: newBal })
+    }
+  } catch (e) {
+    console.warn('Add AI credits error:', e)
+  }
+}
+
+// ── platform AURA AI engine module (super admin) ────────────────────────────
+
+export const getAuraAiConfig = async () => {
+  try {
+    const cfg = await supabase.from('aura_ai_config').select('*').eq('is_active', true).limit(1).maybeSingle().then(ok)
+    if (cfg) return cfg
+  } catch (e) {
+    console.warn('Aura config read error:', e)
+  }
+  return { provider: 'openai', model: 'gpt-4o-mini', credit_rate_triage: 1, credit_rate_reply: 2, is_active: true }
+}
+
+export const saveAuraAiConfig = (patch) => saveRow('aura_ai_config', patch)
+
+export const listTenantAiUsage = async (tenant_id = null) => {
+  try {
+    let q = supabase.from('tenant_ai_usage').select('*').order('created_at', { ascending: false }).limit(100)
+    if (tenant_id) q = q.eq('tenant_id', tenant_id)
+    const logs = await q.then(ok)
+    if (logs && logs.length) return logs
+  } catch (e) {
+    console.warn('Tenant AI usage error:', e)
+  }
+  return []
+}
+
+// ── tenant sub-members & RBAC (member accounts) ────────────────────────────
+
+export const listTenantMembers = async (tenant_id) => {
+  try {
+    const members = await supabase.from('tenant_members').select('*').order('created_at', { ascending: false }).then(ok)
+    if (members && members.length) return members
+  } catch (e) {
+    console.warn('Tenant members list error:', e)
+  }
+  return [
+    { id: 'tm-01', email: 'owner@company.com', display_name: 'Org Owner', role: 'owner', inbox_access: ['*'] },
+    { id: 'tm-02', email: 'support.lead@company.com', display_name: 'Support Admin', role: 'admin', inbox_access: ['*'] },
+  ]
+}
+
+export const saveTenantMember = (patch) => saveRow('tenant_members', patch)
+export const deleteTenantMember = (id) => supabase.from('tenant_members').delete().eq('id', id).then(ok)
+
+// ── inbox knowledge base / RAG context (member accounts) ─────────────────────
+
+export const listKnowledgeBase = async (tenant_id = null) => {
+  try {
+    let q = supabase.from('inbox_knowledge_base').select('*').order('created_at', { ascending: false })
+    if (tenant_id) q = q.eq('tenant_id', tenant_id)
+    const docs = await q.then(ok)
+    if (docs && docs.length) return docs
+  } catch (e) {
+    console.warn('Knowledge base list error:', e)
+  }
+  return [
+    { id: 'kb-01', title: 'Return & Refund Policy', content: 'Customers can request refunds within 30 days of purchase.', category: 'Policy', is_active: true },
+    { id: 'kb-02', title: 'Technical Support Hours', content: 'Our support team is available Mon-Fri 9am to 6pm EST.', category: 'Support', is_active: true }
+  ]
+}
+
+export const saveKnowledgeBase = (patch) => saveRow('inbox_knowledge_base', patch)
+export const deleteKnowledgeBase = (id) => supabase.from('inbox_knowledge_base').delete().eq('id', id).then(ok)
+
+

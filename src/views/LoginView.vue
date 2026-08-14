@@ -16,16 +16,6 @@ const loading = ref(false)
 
 onMounted(() => loadBranding())
 
-function fillSuperAdmin() {
-  email.value = 'bilalsiddiq@gmail.com'
-  password.value = 'welcomeme123'
-}
-
-async function quickLoginSuperAdmin() {
-  fillSuperAdmin()
-  await handleLogin()
-}
-
 async function handleLogin() {
   error.value = ''
   loading.value = true
@@ -46,29 +36,24 @@ async function handleLogin() {
       <div class="login-header">
         <div v-if="branding.logoSvg" v-html="branding.logoSvg" class="login-logo-svg"></div>
         <img v-else-if="branding.logoUrl" :src="branding.logoUrl" alt="Logo" class="login-logo-img" />
-        <span v-else class="login-logo">⚡</span>
-        <h1>{{ branding.appName }}</h1>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 64" width="177" height="48" class="login-logo-svg" role="img" aria-label="RelayRow">
+          <defs>
+            <linearGradient id="rrLgA" x1="6" y1="38" x2="58" y2="26" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#818CF8"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="rrLgB" x1="150" y1="46" x2="220" y2="20" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#818CF8"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="13" width="30" height="8" rx="4" fill="#818CF8" opacity=".45"/>
+          <rect x="6" y="28" width="38" height="8" rx="4" fill="url(#rrLgA)"/>
+          <rect x="6" y="43" width="22" height="8" rx="4" fill="#818CF8" opacity=".45"/>
+          <circle cx="54" cy="32" r="4" fill="#22D3EE"/>
+          <text x="78" y="43" font-family="Inter, system-ui, sans-serif" font-size="30" font-weight="600" letter-spacing="-.6" fill="var(--rr-text)">Relay<tspan fill="url(#rrLgB)">Row</tspan></text>
+        </svg>
         <p class="login-subtitle">Multi-tenant email platform · {{ branding.appUrl }}</p>
-      </div>
-
-
-      <!-- Quick Super Admin Card -->
-      <div class="quick-admin-banner">
-        <div class="banner-title">
-          <span class="badge-crown">👑</span> Super Admin Owner
-        </div>
-        <div class="banner-credentials">
-          <div><strong>Email:</strong> <code>bilalsiddiq@gmail.com</code></div>
-          <div><strong>Pass:</strong> <code>welcomeme123</code></div>
-        </div>
-        <div class="banner-actions">
-          <button type="button" class="banner-btn secondary" @click="fillSuperAdmin">
-            Fill Fields
-          </button>
-          <button type="button" class="banner-btn primary" :disabled="loading" @click="quickLoginSuperAdmin">
-            Quick Sign In
-          </button>
-        </div>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
@@ -149,75 +134,6 @@ async function handleLogin() {
   color: var(--xe-text-dim);
 }
 
-.quick-admin-banner {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  border-radius: var(--xe-radius);
-  padding: 12px 14px;
-  margin-bottom: 20px;
-  font-size: 12px;
-}
-
-.banner-title {
-  font-weight: 600;
-  color: var(--xe-text);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.badge-crown {
-  font-size: 14px;
-}
-
-.banner-credentials {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  color: var(--xe-text-muted);
-  margin-bottom: 10px;
-}
-
-.banner-credentials code {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: var(--xe-text);
-  font-family: monospace;
-}
-
-.banner-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.banner-btn {
-  flex: 1;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
-}
-
-.banner-btn.primary {
-  background: var(--xe-accent);
-  color: #fff;
-}
-
-.banner-btn.secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--xe-text);
-  border: 1px solid var(--xe-border);
-}
-
-.banner-btn:hover {
-  opacity: 0.9;
-}
-
 .login-form { display: flex; flex-direction: column; gap: 16px; }
 
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -261,16 +177,28 @@ async function handleLogin() {
   padding: 10px 16px;
   border-radius: var(--xe-radius);
   border: none;
-  background: var(--xe-accent);
-  color: #fff;
+  background: var(--rr-accent);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background var(--xe-transition);
+  box-shadow: 0 4px 14px var(--rr-accent-transparent);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  user-select: none;
 }
 
-.login-btn:hover:not(:disabled) { background: var(--xe-accent-hover); }
+.login-btn:hover:not(:disabled) {
+  background: var(--rr-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--rr-accent-transparent);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 2px 8px var(--rr-accent-transparent);
+}
+
 .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 

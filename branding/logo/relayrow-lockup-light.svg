@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 64" width="236" height="64" role="img" aria-label="RelayRow">
+  <title>RelayRow horizontal lockup — for light backgrounds</title>
+  <defs>
+    <linearGradient id="rrLockA" x1="6" y1="38" x2="58" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="rrLockB" x1="150" y1="46" x2="220" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+  </defs>
+  <rect x="6"  y="13" width="30" height="8" rx="4" fill="#6366F1" opacity=".38"/>
+  <rect x="6"  y="28" width="38" height="8" rx="4" fill="url(#rrLockA)"/>
+  <rect x="6"  y="43" width="22" height="8" rx="4" fill="#6366F1" opacity=".38"/>
+  <circle cx="54" cy="32" r="4" fill="#22D3EE"/>
+  <text x="78" y="43" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif"
+        font-size="30" font-weight="600" letter-spacing="-.6" fill="#0B1020">Relay<tspan fill="url(#rrLockB)">Row</tspan></text>
+</svg>
