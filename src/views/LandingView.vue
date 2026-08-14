@@ -1,9 +1,29 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useBrandingStore } from '@/stores/branding'
 
 const brandingStore = useBrandingStore()
+
+// Rotating 3 Headings for Hero Title
+const rotatingHeadings = [
+  { prefix: 'The Future of Email', highlight: 'is Here.' },
+  { prefix: 'Receive & Reply Mail with', highlight: 'Zero Mail Server.' },
+  { prefix: 'Turn Email Inboxes into', highlight: 'Database Rows.' }
+]
+
+const currentHeadingIdx = ref(0)
+let headingTimer = null
+
+onMounted(() => {
+  headingTimer = setInterval(() => {
+    currentHeadingIdx.value = (currentHeadingIdx.value + 1) % rotatingHeadings.length
+  }, 3800)
+})
+
+onUnmounted(() => {
+  if (headingTimer) clearInterval(headingTimer)
+})
 
 // Billing toggle: monthly vs yearly (20% discount)
 const isYearly = ref(true)
@@ -274,7 +294,12 @@ function toggleFaq(idx) {
           <span class="sparkle">⚡</span> Next-Gen Multi-Tenant Email Engine & AURA AI Gateway
         </div>
         <h1 class="hero-title">
-          Receive, Thread & Reply to Mail on Your Domain with <span class="gradient-text">Zero Mail Server</span>
+          <Transition name="heading-fade" mode="out-in">
+            <span :key="currentHeadingIdx" class="heading-rotator">
+              {{ rotatingHeadings[currentHeadingIdx].prefix }}
+              <span class="gradient-text">{{ rotatingHeadings[currentHeadingIdx].highlight }}</span>
+            </span>
+          </Transition>
         </h1>
         <p class="hero-subtitle">
           RelayRow turns email addresses into database rows. Powered by Supabase Edge Functions, Svix HMAC security, per-seat RBAC, and platform-wide AURA AI triage.
@@ -959,9 +984,30 @@ function toggleFaq(idx) {
 .hero-title {
   font-size: 3.2rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.03em;
   margin-bottom: 1.25rem;
+  min-height: 4.2rem;
+}
+
+.heading-rotator {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.heading-fade-enter-active,
+.heading-fade-leave-active {
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.heading-fade-enter-from {
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+}
+
+.heading-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.98);
 }
 
 .gradient-text {
