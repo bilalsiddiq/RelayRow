@@ -183,17 +183,17 @@ function toggleFaq(idx) {
 
         <div class="nav-actions">
           <template v-if="auth.user">
-            <span class="user-pill font-mono text-xs text-white/70 bg-black/40 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>{{ auth.user.email }}</span>
+            <span class="user-pill" :title="auth.user.email">
+              <span class="user-status-dot"></span>
+              <span class="user-email-text">{{ auth.user.email }}</span>
             </span>
-            <RouterLink to="/inbox" class="btn btn-gradient">
-              Go to Inbox & Dashboard →
+            <RouterLink to="/inbox" class="btn btn-gradient btn-nowrap">
+              Go to Dashboard →
             </RouterLink>
-            <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="btn btn-outline-sm">
-              👑 Admin Panel
+            <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="btn btn-outline-sm btn-nowrap">
+              👑 Admin
             </RouterLink>
-            <button @click="auth.signOut()" class="btn btn-ghost">
+            <button @click="auth.signOut()" class="btn-signout-ghost">
               Sign Out
             </button>
           </template>
@@ -694,12 +694,13 @@ function toggleFaq(idx) {
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1.25rem;
 }
 
 .brand-logo {
@@ -707,6 +708,7 @@ function toggleFaq(idx) {
   align-items: center;
   gap: 0.6rem;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 /* ── Animated Logo Mark ─────────────────────────────────────────────────── */
@@ -747,15 +749,19 @@ function toggleFaq(idx) {
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 1;
+  white-space: nowrap;
 }
 
 .nav-links a {
   color: var(--xe-text-muted);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   transition: color var(--xe-transition);
+  white-space: nowrap;
 }
 
 .nav-links a:hover { color: var(--rr-text); }
@@ -763,7 +769,72 @@ function toggleFaq(idx) {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.btn-nowrap {
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 170px;
+  flex-shrink: 0;
+}
+
+.user-status-dot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  min-height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 6px #10B981;
+  flex-shrink: 0;
+}
+
+.user-email-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.btn-signout-ghost {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+
+.btn-signout-ghost:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 980px) {
+  .nav-links { display: none; }
+  .user-pill { max-width: 120px; }
 }
 
 /* Hero */
