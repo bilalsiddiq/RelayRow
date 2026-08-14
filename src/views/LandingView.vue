@@ -7,6 +7,27 @@ import { useAuthStore } from '@/stores/auth'
 const brandingStore = useBrandingStore()
 const auth = useAuthStore()
 
+// User Profile Avatar Dropdown Menu State
+const showUserMenu = ref(false)
+
+const userInitials = computed(() => {
+  if (!auth.user?.email) return 'U'
+  const parts = auth.user.email.split('@')[0].split('.')
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return auth.user.email.substring(0, 2).toUpperCase()
+})
+
+const userName = computed(() => {
+  if (!auth.user?.email) return 'User'
+  return auth.user.email.split('@')[0]
+})
+
+function toggleUserMenu() {
+  showUserMenu.value = !showUserMenu.value
+}
+
 // Rotating 3 Headings for Hero Title
 const rotatingHeadings = [
   { prefix: 'The Future of Email', highlight: 'is Here.' },
@@ -183,19 +204,45 @@ function toggleFaq(idx) {
 
         <div class="nav-actions">
           <template v-if="auth.user">
-            <span class="user-pill" :title="auth.user.email">
-              <span class="user-status-dot"></span>
-              <span class="user-email-text">{{ auth.user.email }}</span>
-            </span>
-            <RouterLink to="/inbox" class="btn btn-gradient btn-nowrap">
-              Go to Dashboard →
-            </RouterLink>
-            <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="btn btn-outline-sm btn-nowrap">
-              👑 Admin
-            </RouterLink>
-            <button @click="auth.signOut()" class="btn-signout-ghost">
-              Sign Out
-            </button>
+            <!-- Single User Profile Avatar Dropdown Button -->
+            <div class="user-dropdown-container">
+              <button class="user-avatar-btn" @click="toggleUserMenu" title="Account Menu">
+                <span class="avatar-badge">{{ userInitials }}</span>
+                <span class="user-display-name">{{ userName }}</span>
+                <svg class="chevron-icon" :class="{ rotate: showUserMenu }" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+
+              <!-- Dropdown Menu Box -->
+              <div v-if="showUserMenu" class="user-dropdown-menu">
+                <div class="menu-user-header">
+                  <div class="font-bold text-sm text-white flex items-center gap-1.5">
+                    <span>{{ userName }}</span>
+                    <span v-if="auth.isSuperAdmin" class="text-xs text-amber-400 font-normal">👑 Staff</span>
+                  </div>
+                  <div class="text-xs text-white/50 font-mono truncate mt-0.5">{{ auth.user.email }}</div>
+                </div>
+
+                <div class="menu-divider"></div>
+
+                <RouterLink to="/inbox" class="menu-item primary" @click="showUserMenu = false">
+                  <span>📥 Go to Dashboard</span>
+                  <span class="text-xs opacity-75">→</span>
+                </RouterLink>
+
+                <RouterLink to="/admin" v-if="auth.isSuperAdmin" class="menu-item admin" @click="showUserMenu = false">
+                  <span>👑 Super Admin Panel</span>
+                  <span class="text-xs opacity-75">→</span>
+                </RouterLink>
+
+                <div class="menu-divider"></div>
+
+                <button class="menu-item danger" @click="auth.signOut(); showUserMenu = false">
+                  <span>🚪 Sign Out</span>
+                </button>
+              </div>
+            </div>
           </template>
           <template v-else>
             <RouterLink to="/login" class="btn btn-ghost">Sign In</RouterLink>
@@ -774,67 +821,149 @@ function toggleFaq(idx) {
   white-space: nowrap;
 }
 
-.btn-nowrap {
-  white-space: nowrap !important;
-  flex-shrink: 0;
+/* ── Single User Profile Dropdown ─────────────────────────────────────────── */
+.user-dropdown-container {
+  position: relative;
 }
 
-.user-pill {
+.user-avatar-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
   border-radius: 9999px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 170px;
-  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--rr-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  outline: none;
 }
 
-.user-status-dot {
-  width: 7px;
-  height: 7px;
-  min-width: 7px;
-  min-height: 7px;
+.user-avatar-btn:hover {
+  border-color: var(--rr-accent);
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: 0 6px 20px var(--rr-accent-transparent);
+  transform: translateY(-1px);
+}
+
+.avatar-badge {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 6px #10B981;
+  background: linear-gradient(135deg, #6366F1 0%, #22D3EE 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
   flex-shrink: 0;
 }
 
-.user-email-text {
+.user-display-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f8fafc;
+  max-width: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: monospace;
 }
 
-.btn-signout-ghost {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
+.chevron-icon {
+  width: 16px;
+  height: 16px;
   color: #94a3b8;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+  transition: transform 0.2s ease;
   flex-shrink: 0;
-  transition: all 0.18s ease;
 }
 
-.btn-signout-ghost:hover {
+.chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Glassmorphic Dropdown Menu Box */
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 230px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.2);
+  z-index: 200;
+  animation: menuFadeIn 0.18s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.menu-user-header {
+  padding: 10px 12px;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f8fafc;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.menu-item.primary {
+  background: var(--rr-accent-transparent);
+  color: #38BDF8;
+}
+
+.menu-item.primary:hover {
+  background: var(--rr-accent);
+  color: #ffffff;
+}
+
+.menu-item.admin {
+  color: #FBBF24;
+}
+
+.menu-item.admin:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.menu-item.danger {
+  color: #f87171;
+}
+
+.menu-item.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.4);
-  transform: translateY(-1px);
 }
 
 @media (max-width: 980px) {
   .nav-links { display: none; }
-  .user-pill { max-width: 120px; }
+  .user-display-name { max-width: 80px; }
 }
 
 /* Hero */
