@@ -66,7 +66,7 @@ async function topUpCredits(tenantId) {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl">
+  <section class="mx-auto max-w-6xl">
     <header class="flex flex-wrap items-center justify-between gap-4 mb-10 pb-5 border-b border-white/10">
       <div>
         <h2 class="text-2xl font-extrabold flex items-center gap-2 tracking-tight">
@@ -76,65 +76,65 @@ async function topUpCredits(tenantId) {
           Configure platform LLM provider catalog, model inference, credit rates, and tenant allocations.
         </p>
       </div>
-      <RouterLink to="/inbox" class="pill">Open Inbox →</RouterLink>
+      <RouterLink to="/inbox" class="zx-btn secondary">Open Inbox →</RouterLink>
     </header>
 
     <p v-if="error" class="err mb-6">{{ error }}</p>
     <p v-if="notice" class="ok mb-6">{{ notice }}</p>
-    <p v-if="loading" class="muted">Loading AURA AI configuration…</p>
+    <p v-if="loading" class="muted text-sm">Loading AURA AI configuration…</p>
 
     <template v-else>
       <!-- ── PLATFORM LLM CONFIGURATION ──────────────────────────────────── -->
-      <div class="panel mb-8">
+      <div class="zx-panel mb-8">
         <h3 class="text-base font-bold mb-1">Platform-Wide LLM Provider Setup</h3>
         <p class="muted text-xs mb-4">
           Super Admin configures platform API keys in Supabase Vault. Member accounts consume platform AURA credits.
         </p>
 
-        <div class="grid2 gap-4">
-          <label class="f">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <label class="zx-field">
             <span>AI Provider</span>
-            <select v-model="auraConfig.provider">
+            <select v-model="auraConfig.provider" class="zx-select">
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
               <option value="openrouter">OpenRouter</option>
               <option value="groq">Groq</option>
             </select>
           </label>
-          <label class="f">
+          <label class="zx-field">
             <span>Default Model</span>
-            <input v-model="auraConfig.model" placeholder="gpt-4o-mini / claude-3-5-sonnet" />
+            <input v-model="auraConfig.model" class="zx-input" placeholder="gpt-4o-mini / claude-3-5-sonnet" />
           </label>
-          <label class="f">
+          <label class="zx-field">
             <span>Triage Rate (Credits/Email)</span>
-            <input v-model="auraConfig.credit_rate_triage" type="number" />
+            <input v-model="auraConfig.credit_rate_triage" type="number" class="zx-input" />
           </label>
-          <label class="f">
+          <label class="zx-field">
             <span>Reply Draft Rate (Credits/Draft)</span>
-            <input v-model="auraConfig.credit_rate_reply" type="number" />
+            <input v-model="auraConfig.credit_rate_reply" type="number" class="zx-input" />
           </label>
         </div>
 
-        <button class="pill primary mt-4" :disabled="busy === 'save-aura'" @click="saveAuraSettings">
+        <button class="zx-btn primary mt-4" :disabled="busy === 'save-aura'" @click="saveAuraSettings">
           {{ busy === 'save-aura' ? 'Saving...' : 'Save Platform AURA Config' }}
         </button>
       </div>
 
       <!-- ── TENANT AI CREDIT TOP-UP ──────────────────────────────────────── -->
-      <div class="panel">
+      <div class="zx-panel">
         <h3 class="text-base font-bold mb-1">Tenant AI Credit Allocations</h3>
         <p class="muted text-xs mb-4">Grant bonus AURA AI credits to tenant organizations.</p>
 
         <div v-if="!tenants.length" class="muted text-sm">No member organizations found.</div>
 
-        <div v-for="t in tenants" :key="t.id" class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-black/20 border border-white/10 mb-3">
+        <div v-for="t in tenants" :key="t.id" class="zx-card flex flex-wrap items-center justify-between gap-4 mb-3">
           <div>
-            <strong class="text-sm">{{ t.name }}</strong>
-            <span class="muted text-xs ml-2"><code>{{ t.slug }}</code></span>
+            <strong class="text-sm font-bold text-white">{{ t.name }}</strong>
+            <span class="muted text-xs ml-2"><code class="text-cyan-300">{{ t.slug }}</code></span>
           </div>
           <div class="flex items-center gap-3">
-            <input v-model="topUpAmount[t.id]" type="number" placeholder="1000" class="w-28 text-xs p-2 rounded border border-white/20 bg-black/30 text-white" />
-            <button class="pill primary" :disabled="busy === `topup-${t.id}`" @click="topUpCredits(t.id)">
+            <input v-model="topUpAmount[t.id]" type="number" placeholder="1000" class="zx-input w-28 text-xs p-2" />
+            <button class="zx-btn primary text-xs" :disabled="busy === `topup-${t.id}`" @click="topUpCredits(t.id)">
               + Add Credits
             </button>
           </div>
@@ -145,47 +145,7 @@ async function topUpCredits(tenantId) {
 </template>
 
 <style scoped>
-.panel {
-  padding: 24px;
-  border-radius: var(--xe-radius-lg);
-  background: var(--rr-bg-surface);
-  border: 1px solid var(--rr-border);
-}
 .muted { color: var(--xe-text-muted); }
-
-.f { display: block; }
-.f span { display: block; font-size: 12px; font-weight: 600; color: var(--xe-text-muted); margin-bottom: 6px; }
-.f input, .f select {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: var(--xe-radius);
-  font-size: 14px;
-  background: var(--rr-bg);
-  border: 1px solid var(--rr-border);
-  color: var(--rr-text);
-  outline: none;
-}
-.f input:focus, .f select:focus { border-color: var(--rr-accent); }
-
-.pill {
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  background: var(--xe-bg-hover);
-  border: 1px solid var(--rr-border);
-  color: var(--rr-text);
-  text-decoration: none;
-}
-.pill.primary {
-  background: var(--rr-accent);
-  color: #ffffff;
-  border: none;
-}
-.pill:hover { opacity: 0.9; }
-
-.err { padding: 10px 14px; border-radius: var(--xe-radius); background: rgba(239, 68, 68, 0.15); color: var(--xe-danger); font-size: 13px; }
-.ok { padding: 10px 14px; border-radius: var(--xe-radius); background: rgba(16, 185, 129, 0.15); color: var(--xe-success); font-size: 13px; }
-.grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.err { padding: 10px 14px; border-radius: var(--xe-radius); background: rgba(239, 68, 68, 0.15); color: var(--xe-danger); font-size: 13px; border: 1px solid rgba(239, 68, 68, 0.3); }
+.ok { padding: 10px 14px; border-radius: var(--xe-radius); background: rgba(16, 185, 129, 0.15); color: var(--xe-success); font-size: 13px; border: 1px solid rgba(16, 185, 129, 0.3); }
 </style>

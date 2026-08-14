@@ -239,6 +239,131 @@ html, body {
   padding: 32px 24px 48px;
 }
 
+/* ── Zexpo Design System Utility Classes ────────────────────────────────────── */
+.zx-panel {
+  padding: 24px;
+  border-radius: var(--xe-radius-lg);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color var(--xe-transition);
+}
+
+.zx-card {
+  padding: 16px;
+  border-radius: var(--xe-radius-lg);
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all var(--xe-transition);
+}
+
+.zx-card:hover {
+  border-color: var(--rr-accent-transparent);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.zx-field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.zx-field span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--xe-text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+.zx-input, .zx-select, .zx-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--xe-radius);
+  font-size: 14px;
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid var(--rr-border);
+  color: var(--rr-text);
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.zx-input:focus, .zx-select:focus, .zx-textarea:focus {
+  border-color: var(--rr-accent);
+  box-shadow: 0 0 0 3px var(--rr-accent-transparent);
+}
+
+.zx-btn {
+  padding: 8px 18px;
+  border-radius: var(--xe-radius);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  user-select: none;
+  text-decoration: none;
+}
+
+.zx-btn.primary {
+  background: var(--rr-accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--rr-accent-transparent);
+}
+
+.zx-btn.primary:hover:not(:disabled) {
+  background: var(--rr-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--rr-accent-transparent);
+}
+
+.zx-btn.primary:active:not(:disabled) {
+  transform: translateY(0px) scale(0.97);
+}
+
+.zx-btn.secondary {
+  background: var(--xe-bg-hover);
+  color: var(--rr-text);
+  border: 1px solid var(--rr-border);
+}
+
+.zx-btn.secondary:hover:not(:disabled) {
+  border-color: var(--rr-accent);
+  background: var(--rr-accent-transparent);
+  transform: translateY(-1px);
+}
+
+.zx-btn.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--xe-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.zx-btn.danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+}
+
+.zx-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zx-badge-accent { background: var(--rr-accent-transparent); color: var(--rr-accent); border: 1px solid var(--rr-accent-transparent); }
+.zx-badge-success { background: rgba(16, 185, 129, 0.15); color: var(--xe-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+.zx-badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--xe-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+.zx-badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--xe-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
