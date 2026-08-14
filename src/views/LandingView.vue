@@ -170,6 +170,105 @@ function toggleFaq(idx) {
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-bg-glow"></div>
+
+      <!-- ── 3D Floating Email Envelopes & Laser Data Stream Scene ─────────── -->
+      <div class="hero-3d-scene" aria-hidden="true">
+        <!-- Connecting Digital Laser Lines SVG -->
+        <svg class="digital-laser-svg" viewBox="0 0 1200 600" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="laserGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#818CF8" stop-opacity="0.2" />
+              <stop offset="50%" stop-color="#22D3EE" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#6366F1" stop-opacity="0.2" />
+            </linearGradient>
+            <linearGradient id="laserGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.1" />
+              <stop offset="50%" stop-color="#818CF8" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2" />
+            </linearGradient>
+            <filter id="glowBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Laser Stream Paths -->
+          <path class="laser-path path-1" d="M 50 150 Q 300 80 600 220 T 1150 120" stroke="url(#laserGrad1)" stroke-width="2.5" fill="none" filter="url(#glowBlur)" />
+          <path class="laser-path path-2" d="M 100 480 Q 450 320 850 420 T 1100 280" stroke="url(#laserGrad2)" stroke-width="2" fill="none" filter="url(#glowBlur)" />
+          <path class="laser-path path-3" d="M 200 80 Q 600 350 1000 180" stroke="url(#laserGrad1)" stroke-width="1.5" stroke-dasharray="8 6" fill="none" />
+        </svg>
+
+        <!-- 3D Floating Envelopes with Varying Sizes & Depths -->
+        <!-- Envelope 1: Large Left Foreground (Deep cyan glow) -->
+        <div class="env-wrapper env-1">
+          <div class="env-card">
+            <svg class="env-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="12" width="56" height="40" rx="8" fill="url(#envBg1)" stroke="#22D3EE" stroke-width="2"/>
+              <path d="M6 16L32 36L58 16" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 44L24 32" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+              <path d="M52 44L40 32" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="32" cy="24" r="3" fill="#22D3EE" class="packet-sparkle"/>
+              <defs>
+                <linearGradient id="envBg1" x1="4" y1="12" x2="60" y2="52" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0F172A" stop-opacity="0.9"/>
+                  <stop offset="1" stop-color="#1E1B4B" stop-opacity="0.95"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="env-badge">Incoming Payload</div>
+          </div>
+        </div>
+
+        <!-- Envelope 2: Medium Right Midground (Indigo glow) -->
+        <div class="env-wrapper env-2">
+          <div class="env-card">
+            <svg class="env-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="12" width="56" height="40" rx="8" fill="url(#envBg2)" stroke="#818CF8" stroke-width="2"/>
+              <path d="M6 16L32 36L58 16" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="32" cy="24" r="3" fill="#818CF8" class="packet-sparkle"/>
+              <defs>
+                <linearGradient id="envBg2" x1="4" y1="12" x2="60" y2="52" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#1E1B4B" stop-opacity="0.85"/>
+                  <stop offset="1" stop-color="#0F172A" stop-opacity="0.9"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="env-badge aura">AURA Verified</div>
+          </div>
+        </div>
+
+        <!-- Envelope 3: Small Far Background Top Right -->
+        <div class="env-wrapper env-3">
+          <div class="env-card">
+            <svg class="env-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="12" width="56" height="40" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1.8"/>
+              <path d="M6 16L32 36L58 16" stroke="#38BDF8" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Envelope 4: Small Far Background Bottom Left -->
+        <div class="env-wrapper env-4">
+          <div class="env-card">
+            <svg class="env-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="12" width="56" height="40" rx="8" fill="#0F172A" stroke="#6366F1" stroke-width="1.8"/>
+              <path d="M6 16L32 36L58 16" stroke="#6366F1" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Envelope 5: Floating Mini Packet Node Top Center -->
+        <div class="env-wrapper env-5">
+          <div class="env-card mini-node">
+            <span class="node-dot"></span>
+            <span class="node-label">50ms Svix Ingest</span>
+          </div>
+        </div>
+      </div>
+
       <div class="hero-content">
         <div class="hero-badge">
           <span class="sparkle">⚡</span> Next-Gen Multi-Tenant Email Engine & AURA AI Gateway
@@ -619,8 +718,209 @@ function toggleFaq(idx) {
   position: relative;
   padding: 5rem 1.5rem 4rem;
   text-align: center;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+/* ── 3D Floating Email Envelopes & Digital Laser Stream Scene ─────────────── */
+.hero-3d-scene {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1300px;
+  height: 100%;
+  min-height: 520px;
+  pointer-events: none;
+  z-index: 1;
+  perspective: 1200px;
+  overflow: visible;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Digital Laser SVG Lines */
+.digital-laser-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.laser-path {
+  stroke-dasharray: 12 12;
+  animation: laserStream 18s linear infinite;
+}
+
+.path-1 { animation-duration: 14s; }
+.path-2 { animation-duration: 20s; animation-direction: reverse; }
+.path-3 { animation-duration: 25s; }
+
+@keyframes laserStream {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* 3D Envelope Wrappers & Positioning */
+.env-wrapper {
+  position: absolute;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.env-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(34, 211, 238, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.env-icon {
+  width: 54px;
+  height: 54px;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.4));
+}
+
+.env-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(34, 211, 238, 0.15);
+  color: #22D3EE;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  white-space: nowrap;
+}
+
+.env-badge.aura {
+  background: rgba(129, 140, 248, 0.15);
+  color: #818CF8;
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.packet-sparkle {
+  animation: sparklePulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes sparklePulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 1; }
+}
+
+/* envelope 1: Large Left Foreground */
+.env-1 {
+  top: 12%;
+  left: 4%;
+  transform: translate3d(0, 0, 80px) rotateY(18deg) rotateX(-8deg) scale(1.25);
+  animation: float3dEnv1 7s ease-in-out infinite alternate;
+}
+
+@keyframes float3dEnv1 {
+  0% { transform: translate3d(0, 0, 80px) rotateY(18deg) rotateX(-8deg) scale(1.25); }
+  50% { transform: translate3d(12px, -18px, 110px) rotateY(22deg) rotateX(-4deg) scale(1.3); }
+  100% { transform: translate3d(-10px, 14px, 60px) rotateY(14deg) rotateX(-12deg) scale(1.2); }
+}
+
+/* envelope 2: Medium Right Midground */
+.env-2 {
+  top: 22%;
+  right: 5%;
+  transform: translate3d(0, 0, 40px) rotateY(-20deg) rotateX(10deg) scale(1.05);
+  animation: float3dEnv2 8s ease-in-out infinite alternate;
+}
+
+@keyframes float3dEnv2 {
+  0% { transform: translate3d(0, 0, 40px) rotateY(-20deg) rotateX(10deg) scale(1.05); }
+  50% { transform: translate3d(-15px, 20px, 70px) rotateY(-15deg) rotateX(14deg) scale(1.1); }
+  100% { transform: translate3d(10px, -12px, 20px) rotateY(-24deg) rotateX(6deg) scale(1); }
+}
+
+/* envelope 3: Small Top Far Background */
+.env-3 {
+  top: 4%;
+  right: 22%;
+  opacity: 0.75;
+  transform: translate3d(0, 0, -60px) rotateY(-12deg) scale(0.75);
+  animation: float3dEnv3 9s ease-in-out infinite alternate;
+}
+
+@keyframes float3dEnv3 {
+  0% { transform: translate3d(0, 0, -60px) rotateY(-12deg) scale(0.75); }
+  100% { transform: translate3d(-8px, 14px, -30px) rotateY(-6deg) scale(0.8); }
+}
+
+/* envelope 4: Small Bottom Left Far Background */
+.env-4 {
+  bottom: 8%;
+  left: 8%;
+  opacity: 0.7;
+  transform: translate3d(0, 0, -40px) rotateY(15deg) scale(0.7);
+  animation: float3dEnv4 8.5s ease-in-out infinite alternate 1s;
+}
+
+@keyframes float3dEnv4 {
+  0% { transform: translate3d(0, 0, -40px) rotateY(15deg) scale(0.7); }
+  100% { transform: translate3d(14px, -16px, -10px) rotateY(20deg) scale(0.75); }
+}
+
+/* envelope 5: Mini Node Top Center */
+.env-5 {
+  top: 2%;
+  left: 28%;
+  opacity: 0.85;
+  animation: float3dEnv5 6s ease-in-out infinite alternate;
+}
+
+@keyframes float3dEnv5 {
+  0% { transform: translateY(0px) scale(0.9); }
+  100% { transform: translateY(-10px) scale(0.95); }
+}
+
+.mini-node {
+  flex-direction: row;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.node-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22D3EE;
+  box-shadow: 0 0 10px #22D3EE;
+  animation: pulseDot 1.5s infinite alternate;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+.node-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rr-text);
+}
+
+@media (max-width: 900px) {
+  .hero-3d-scene { opacity: 0.45; }
+  .env-1 { left: 1%; transform: scale(0.85); }
+  .env-2 { right: 1%; transform: scale(0.85); }
+  .env-3, .env-4, .env-5 { display: none; }
 }
 
 .hero-bg-glow {
