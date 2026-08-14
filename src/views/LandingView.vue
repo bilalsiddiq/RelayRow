@@ -344,14 +344,6 @@ function toggleFaq(idx) {
             </svg>
           </div>
         </div>
-
-        <!-- Envelope 5: Floating Mini Packet Node Top Center -->
-        <div class="env-wrapper env-5">
-          <div class="env-card mini-node">
-            <span class="node-dot"></span>
-            <span class="node-label">50ms Svix Ingest</span>
-          </div>
-        </div>
       </div>
 
       <div class="hero-content">
@@ -969,7 +961,7 @@ function toggleFaq(idx) {
 /* Hero */
 .hero-section {
   position: relative;
-  padding: 5rem 1.5rem 4rem;
+  padding: 7.5rem 1.5rem 5rem;
   text-align: center;
   max-width: 1200px;
   margin: 0 auto;
@@ -1265,7 +1257,7 @@ function toggleFaq(idx) {
   border: 1px solid var(--rr-border);
   padding: 1.25rem 2rem;
   border-radius: var(--xe-radius-lg);
-  margin-bottom: 3.5rem;
+  margin-bottom: 5.5rem;
 }
 
 .metric-num {
