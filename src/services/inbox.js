@@ -62,7 +62,10 @@ export const attachmentUrl = (attachment_id) => invokeInbox({ action: 'attachmen
 export const rescanMessage = (message_id) => invokeInbox({ action: 'rescan', message_id })
 
 // super admin
-export const domainWebhookUrl = (domain_id) => invokeInbox({ action: 'webhook_url', domain_id })
+export const domainWebhookUrl = (domain_id) => {
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hhyywwmkniujffyzovak.supabase.co'
+  return `${baseUrl}/functions/v1/inbox?domain_id=${domain_id}`
+}
 /** Store (or clear, with '') the Svix signing secret — enables webhook signature verification. */
 export const setSigningSecret = (domain_id, secret) => invokeInbox({ action: 'set_signing_secret', domain_id, secret })
 export const testDomainKey = (domain_id) => invokeInbox({ action: 'test_domain', domain_id })

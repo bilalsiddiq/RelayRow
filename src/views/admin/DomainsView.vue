@@ -180,33 +180,66 @@ async function removeAddr(a) {
         </button>
 
         <div class="grid grid-cols-1 gap-4 mt-6">
-          <div v-for="d in domains" :key="d.id" class="zx-card">
-            <div class="flex flex-wrap justify-between items-center mb-3">
+          <div v-for="d in domains" :key="d.id" class="zx-card p-5">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between gap-4 pb-4 border-b border-white/10">
               <div class="flex items-center gap-3">
-                <strong class="text-base font-bold text-white">{{ d.domain }}</strong>
-                <span class="zx-badge zx-badge-accent">{{ d.label || 'Inbound' }}</span>
-              </div>
-              <button class="zx-btn danger text-xs" @click="removeDomain(d)">Delete Domain</button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 pt-3 border-t border-white/10">
-              <div class="zx-field">
-                <span>Resend Vault API Key</span>
-                <div class="flex gap-2">
-                  <input v-model="domainKeyInput[d.id]" type="password" placeholder="re_123456789..." class="zx-input text-xs" />
-                  <button class="zx-btn primary text-xs" :disabled="busy === `key-${d.id}`" @click="updateDomainKey(d)">Save Key</button>
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-lg">
+                  🌐
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="text-base font-extrabold text-white tracking-tight">{{ d.domain }}</h4>
+                    <span class="zx-badge zx-badge-accent">{{ d.label || 'Inbound' }}</span>
+                  </div>
+                  <span class="text-xs text-white/50">Unknown recipient: <code class="text-cyan-300 font-mono">{{ d.unknown_recipient || 'catch_all' }}</code></span>
                 </div>
               </div>
-              <div class="zx-field">
-                <span>Webhook Ingestion URL</span>
-                <input :value="domainWebhookUrl(d.id)" readonly class="zx-input text-xs select-all bg-black/50 text-cyan-300 font-mono" />
+
+              <button class="zx-btn danger text-xs" @click="removeDomain(d)">
+                <span>🗑️ Delete Domain</span>
+              </button>
+            </div>
+
+            <!-- Configuration Cards Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+              <!-- Vault Key Input Card -->
+              <div class="p-4 rounded-xl bg-black/40 border border-white/10">
+                <label class="zx-field mb-1">
+                  <span class="text-xs font-bold text-white/70 uppercase tracking-wider">Resend Vault API Key</span>
+                  <div class="flex gap-2 mt-1.5">
+                    <input v-model="domainKeyInput[d.id]" type="password" placeholder="re_123456789..." class="zx-input text-xs font-mono" />
+                    <button class="zx-btn primary text-xs whitespace-nowrap" :disabled="busy === `key-${d.id}`" @click="updateDomainKey(d)">
+                      Save Key
+                    </button>
+                  </div>
+                </label>
+                <div class="text-[11px] text-white/50 mt-2">
+                  Key status: <code class="text-emerald-400 font-mono">{{ d.resend_key_tail ? `Encrypted (${d.resend_key_tail})` : 'Unset' }}</code>
+                </div>
+              </div>
+
+              <!-- Webhook URL Card -->
+              <div class="p-4 rounded-xl bg-black/40 border border-white/10">
+                <label class="zx-field mb-1">
+                  <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Webhook Ingestion URL</span>
+                  <div class="flex gap-2 mt-1.5">
+                    <input :value="domainWebhookUrl(d.id)" readonly class="zx-input text-xs select-all bg-black/60 text-cyan-300 font-mono" />
+                    <button class="zx-btn secondary text-xs whitespace-nowrap" @click="copyText(domainWebhookUrl(d.id), `wh-${d.id}`)">
+                      {{ copiedField === `wh-${d.id}` ? '✓ Copied' : 'Copy URL' }}
+                    </button>
+                  </div>
+                </label>
+                <div class="text-[11px] text-white/50 mt-2">
+                  Paste into Resend Dashboard ➔ Webhooks
+                </div>
               </div>
             </div>
 
             <!-- DNS Setup Guidelines Drawer Button -->
-            <div class="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
               <button class="zx-btn secondary text-xs" @click="toggleDnsGuide(d.id)">
-                <span>⚡ {{ showDnsGuide[d.id] ? 'Hide DNS & MX Instructions' : '📖 View DNS & MX Setup Guidelines' }}</span>
+                <span>⚡ {{ showDnsGuide[d.id] ? 'Hide DNS Guidelines' : '📖 View DNS & MX Setup Guidelines' }}</span>
               </button>
               <span class="text-xs text-white/50">Required for routing live emails</span>
             </div>

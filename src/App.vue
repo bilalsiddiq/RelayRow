@@ -294,6 +294,17 @@ html, body {
   box-shadow: 0 0 0 3px var(--rr-accent-transparent);
 }
 
+/* Chrome/Edge Autofill Override - Prevents Blinding White Inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #090d16 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .zx-btn {
   padding: 8px 18px;
   border-radius: var(--xe-radius);
