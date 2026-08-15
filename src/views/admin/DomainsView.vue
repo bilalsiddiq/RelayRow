@@ -244,68 +244,74 @@ async function removeAddr(a) {
               <span class="text-xs text-white/50">Required for routing live emails</span>
             </div>
 
-            <!-- DNS Setup Guidelines Drawer Content -->
-            <div v-if="showDnsGuide[d.id]" class="mt-4 p-4 rounded-xl bg-black/60 border border-cyan-500/30 text-xs">
-              <h4 class="text-sm font-bold text-cyan-300 mb-2 flex items-center gap-2">
-                <span>📋</span> Required DNS Records for <code class="text-white font-mono">{{ d.domain }}</code>
-              </h4>
-              <p class="text-white/70 mb-4 leading-relaxed">
-                Add the following DNS records in your domain registrar (Cloudflare, Namecheap, GoDaddy, AWS Route 53) to route incoming emails to RelayRow via Resend catch-all webhooks:
-              </p>
-
-              <!-- Table of DNS Records -->
-              <div class="rounded-xl border border-white/10 overflow-hidden mb-4 bg-black/40">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="bg-black/60 border-b border-white/10 text-white/50 text-[11px] uppercase tracking-wider">
-                      <th class="py-3 px-4 w-16">Type</th>
-                      <th class="py-3 px-4">Host / Name</th>
-                      <th class="py-3 px-4">Value / Target</th>
-                      <th class="py-3 px-4 w-20">Priority</th>
-                      <th class="py-3 px-4 text-right w-28">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-white/10 font-mono text-xs">
-                    <!-- MX Record -->
-                    <tr class="hover:bg-white/5 transition-colors">
-                      <td class="py-3 px-4 font-bold text-amber-400">MX</td>
-                      <td class="py-3 px-4 text-white">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></td>
-                      <td class="py-3 px-4 text-cyan-300 font-bold">inbound.resend.com</td>
-                      <td class="py-3 px-4 text-white">10</td>
-                      <td class="py-3 px-4 text-right">
-                        <button class="zx-btn secondary text-[11px] py-1 px-2.5 whitespace-nowrap" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
-                          {{ copiedField === `mx-${d.id}` ? '✓ Copied' : 'Copy Target' }}
-                        </button>
-                      </td>
-                    </tr>
-
-                    <!-- SPF Record -->
-                    <tr class="hover:bg-white/5 transition-colors">
-                      <td class="py-3 px-4 font-bold text-emerald-400">TXT</td>
-                      <td class="py-3 px-4 text-white">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></td>
-                      <td class="py-3 px-4 text-cyan-300 font-bold">v=spf1 include:amazonses.com ~all</td>
-                      <td class="py-3 px-4 text-white/40">—</td>
-                      <td class="py-3 px-4 text-right">
-                        <button class="zx-btn secondary text-[11px] py-1 px-2.5 whitespace-nowrap" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
-                          {{ copiedField === `spf-${d.id}` ? '✓ Copied' : 'Copy Value' }}
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            <!-- DNS Setup Guidelines Drawer Content (NO TABLES - Card Layout) -->
+            <div v-if="showDnsGuide[d.id]" class="mt-6 p-6 rounded-2xl bg-black/70 border border-cyan-500/30 text-xs space-y-5">
+              <div>
+                <h4 class="text-base font-extrabold text-cyan-300 mb-1 flex items-center gap-2">
+                  <span>📋</span> Required DNS Records for <code class="text-white font-mono bg-black/60 px-2 py-0.5 rounded border border-white/10">{{ d.domain }}</code>
+                </h4>
+                <p class="text-white/70 text-xs leading-relaxed">
+                  Add the following DNS records in your domain registrar (Cloudflare, Namecheap, GoDaddy, AWS Route 53) to route incoming emails to RelayRow via Resend catch-all webhooks:
+                </p>
               </div>
 
-              <!-- Resend Webhook Configuration Instructions -->
-              <div class="p-3 rounded-lg bg-indigo-950/40 border border-indigo-500/30">
-                <h5 class="font-bold text-indigo-300 mb-1 flex items-center gap-1.5">
-                  <span>🔗</span> Resend Inbound Webhook Setup
+              <!-- Sleek Card-Based DNS Records (NO TABLES) -->
+              <div class="space-y-3">
+                <!-- MX Record Card -->
+                <div class="zx-record-card p-4 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <span class="zx-badge-mx">MX</span>
+                    <div>
+                      <div class="text-[11px] text-white/40 uppercase tracking-wider">Host / Name</div>
+                      <code class="text-white text-xs font-mono">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></code>
+                    </div>
+                  </div>
+
+                  <div class="flex-1 min-w-[200px]">
+                    <div class="text-[11px] text-white/40 uppercase tracking-wider mb-0.5">Target Value</div>
+                    <div class="flex items-center gap-2">
+                      <code class="text-cyan-300 text-xs font-mono font-bold">inbound.resend.com</code>
+                      <span class="text-[11px] text-amber-400/80 font-mono bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Priority 10</span>
+                    </div>
+                  </div>
+
+                  <button class="zx-btn secondary text-xs shrink-0" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
+                    {{ copiedField === `mx-${d.id}` ? '✓ Copied' : '📋 Copy Target' }}
+                  </button>
+                </div>
+
+                <!-- TXT SPF Record Card -->
+                <div class="zx-record-card p-4 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <span class="zx-badge-txt">TXT</span>
+                    <div>
+                      <div class="text-[11px] text-white/40 uppercase tracking-wider">Host / Name</div>
+                      <code class="text-white text-xs font-mono">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></code>
+                    </div>
+                  </div>
+
+                  <div class="flex-1 min-w-[200px]">
+                    <div class="text-[11px] text-white/40 uppercase tracking-wider mb-0.5">TXT Value (SPF Deliverability)</div>
+                    <code class="text-cyan-300 text-xs font-mono font-bold">v=spf1 include:amazonses.com ~all</code>
+                  </div>
+
+                  <button class="zx-btn secondary text-xs shrink-0" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
+                    {{ copiedField === `spf-${d.id}` ? '✓ Copied' : '📋 Copy Value' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Resend Inbound Webhook Instructions -->
+              <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2">
+                <h5 class="font-bold text-indigo-300 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                  <span>🔗</span> Resend Inbound Webhook Setup Guide
                 </h5>
-                <ol class="list-decimal list-inside space-y-1 text-white/80 leading-relaxed pl-1">
+                <ol class="list-decimal list-inside space-y-2 text-white/80 leading-relaxed text-xs pl-1">
                   <li>Log into your <strong>Resend Dashboard</strong> ➔ <strong>Webhooks</strong>.</li>
                   <li>Click <strong>Add Webhook</strong> and paste your RelayRow Webhook URL:
-                    <code class="block mt-1 p-2 rounded bg-black/60 text-cyan-300 select-all font-mono text-[11px]">{{ domainWebhookUrl(d.id) }}</code>
+                    <code class="block mt-1.5 p-3 rounded-lg bg-black/80 text-cyan-300 select-all font-mono text-xs border border-white/10 leading-normal">{{ domainWebhookUrl(d.id) }}</code>
                   </li>
-                  <li>Select event: <code>email.received</code>.</li>
+                  <li>Select event: <code class="text-amber-300 font-mono">email.received</code>.</li>
                   <li>Copy your Resend API Key into the <strong>Resend Vault API Key</strong> field above.</li>
                 </ol>
               </div>

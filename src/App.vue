@@ -374,6 +374,17 @@ select:-webkit-autofill {
 .zx-badge-success { background: rgba(16, 185, 129, 0.15); color: var(--xe-success); border: 1px solid rgba(16, 185, 129, 0.3); }
 .zx-badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--xe-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 .zx-badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--xe-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+.zx-badge-mx { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
+.zx-badge-txt { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
+
+.zx-record-card {
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+.zx-record-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(15, 23, 42, 0.9);
+  transform: translateY(-1px);
+}
 
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
