@@ -204,41 +204,41 @@ async function removeAddr(a) {
             <!-- Configuration Cards Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
               <!-- Vault Key Input Card -->
-              <div class="p-4 rounded-xl bg-black/40 border border-white/10">
-                <label class="zx-field mb-1">
-                  <span class="text-xs font-bold text-white/70 uppercase tracking-wider">Resend Vault API Key</span>
-                  <div class="flex gap-2 mt-1.5">
-                    <input v-model="domainKeyInput[d.id]" type="password" placeholder="re_123456789..." class="zx-input text-xs font-mono" />
-                    <button class="zx-btn primary text-xs whitespace-nowrap" :disabled="busy === `key-${d.id}`" @click="updateDomainKey(d)">
+              <div class="p-4 rounded-xl bg-black/40 border border-white/10 flex flex-col justify-between">
+                <div>
+                  <div class="text-xs font-bold text-white/70 uppercase tracking-wider mb-2">Resend Vault API Key</div>
+                  <div class="flex items-center gap-2">
+                    <input v-model="domainKeyInput[d.id]" type="password" placeholder="re_123456789..." class="zx-input text-xs font-mono flex-1 min-w-0" />
+                    <button class="zx-btn primary text-xs whitespace-nowrap shrink-0" :disabled="busy === `key-${d.id}`" @click="updateDomainKey(d)">
                       Save Key
                     </button>
                   </div>
-                </label>
-                <div class="text-[11px] text-white/50 mt-2">
+                </div>
+                <div class="text-[11px] text-white/50 mt-3 pt-2 border-t border-white/5">
                   Key status: <code class="text-emerald-400 font-mono">{{ d.resend_key_tail ? `Encrypted (${d.resend_key_tail})` : 'Unset' }}</code>
                 </div>
               </div>
 
               <!-- Webhook URL Card -->
-              <div class="p-4 rounded-xl bg-black/40 border border-white/10">
-                <label class="zx-field mb-1">
-                  <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Webhook Ingestion URL</span>
-                  <div class="flex gap-2 mt-1.5">
-                    <input :value="domainWebhookUrl(d.id)" readonly class="zx-input text-xs select-all bg-black/60 text-cyan-300 font-mono" />
-                    <button class="zx-btn secondary text-xs whitespace-nowrap" @click="copyText(domainWebhookUrl(d.id), `wh-${d.id}`)">
+              <div class="p-4 rounded-xl bg-black/40 border border-white/10 flex flex-col justify-between">
+                <div>
+                  <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">Webhook Ingestion URL</div>
+                  <div class="flex items-center gap-2">
+                    <input :value="domainWebhookUrl(d.id)" readonly class="zx-input text-xs select-all bg-black/60 text-cyan-300 font-mono flex-1 min-w-0" />
+                    <button class="zx-btn secondary text-xs whitespace-nowrap shrink-0" @click="copyText(domainWebhookUrl(d.id), `wh-${d.id}`)">
                       {{ copiedField === `wh-${d.id}` ? '✓ Copied' : 'Copy URL' }}
                     </button>
                   </div>
-                </label>
-                <div class="text-[11px] text-white/50 mt-2">
+                </div>
+                <div class="text-[11px] text-white/50 mt-3 pt-2 border-t border-white/5">
                   Paste into Resend Dashboard ➔ Webhooks
                 </div>
               </div>
             </div>
 
             <!-- DNS Setup Guidelines Drawer Button -->
-            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
-              <button class="zx-btn secondary text-xs" @click="toggleDnsGuide(d.id)">
+            <div class="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <button class="zx-btn secondary text-xs shrink-0" @click="toggleDnsGuide(d.id)">
                 <span>⚡ {{ showDnsGuide[d.id] ? 'Hide DNS Guidelines' : '📖 View DNS & MX Setup Guidelines' }}</span>
               </button>
               <span class="text-xs text-white/50">Required for routing live emails</span>
@@ -247,46 +247,46 @@ async function removeAddr(a) {
             <!-- DNS Setup Guidelines Drawer Content -->
             <div v-if="showDnsGuide[d.id]" class="mt-4 p-4 rounded-xl bg-black/60 border border-cyan-500/30 text-xs">
               <h4 class="text-sm font-bold text-cyan-300 mb-2 flex items-center gap-2">
-                <span>📋</span> Required DNS Records for <code class="text-white">{{ d.domain }}</code>
+                <span>📋</span> Required DNS Records for <code class="text-white font-mono">{{ d.domain }}</code>
               </h4>
               <p class="text-white/70 mb-4 leading-relaxed">
                 Add the following DNS records in your domain registrar (Cloudflare, Namecheap, GoDaddy, AWS Route 53) to route incoming emails to RelayRow via Resend catch-all webhooks:
               </p>
 
               <!-- Table of DNS Records -->
-              <div class="overflow-x-auto mb-4">
+              <div class="rounded-xl border border-white/10 overflow-hidden mb-4 bg-black/40">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="border-b border-white/10 text-white/50 text-[11px] uppercase">
-                      <th class="py-2 px-2">Type</th>
-                      <th class="py-2 px-2">Host / Name</th>
-                      <th class="py-2 px-2">Value / Target</th>
-                      <th class="py-2 px-2">Priority</th>
-                      <th class="py-2 px-2 text-right">Action</th>
+                    <tr class="bg-black/60 border-b border-white/10 text-white/50 text-[11px] uppercase tracking-wider">
+                      <th class="py-3 px-4 w-16">Type</th>
+                      <th class="py-3 px-4">Host / Name</th>
+                      <th class="py-3 px-4">Value / Target</th>
+                      <th class="py-3 px-4 w-20">Priority</th>
+                      <th class="py-3 px-4 text-right w-28">Action</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-white/5 font-mono">
+                  <tbody class="divide-y divide-white/10 font-mono text-xs">
                     <!-- MX Record -->
-                    <tr>
-                      <td class="py-2.5 px-2 font-bold text-amber-400">MX</td>
-                      <td class="py-2.5 px-2 text-white">@ <span class="text-white/40">(or {{ d.domain }})</span></td>
-                      <td class="py-2.5 px-2 text-cyan-300">inbound.resend.com</td>
-                      <td class="py-2.5 px-2 text-white">10</td>
-                      <td class="py-2.5 px-2 text-right">
-                        <button class="zx-btn secondary text-[11px] py-1 px-2" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
+                    <tr class="hover:bg-white/5 transition-colors">
+                      <td class="py-3 px-4 font-bold text-amber-400">MX</td>
+                      <td class="py-3 px-4 text-white">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></td>
+                      <td class="py-3 px-4 text-cyan-300 font-bold">inbound.resend.com</td>
+                      <td class="py-3 px-4 text-white">10</td>
+                      <td class="py-3 px-4 text-right">
+                        <button class="zx-btn secondary text-[11px] py-1 px-2.5 whitespace-nowrap" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
                           {{ copiedField === `mx-${d.id}` ? '✓ Copied' : 'Copy Target' }}
                         </button>
                       </td>
                     </tr>
 
                     <!-- SPF Record -->
-                    <tr>
-                      <td class="py-2.5 px-2 font-bold text-emerald-400">TXT</td>
-                      <td class="py-2.5 px-2 text-white">@ <span class="text-white/40">(or {{ d.domain }})</span></td>
-                      <td class="py-2.5 px-2 text-cyan-300">v=spf1 include:amazonses.com ~all</td>
-                      <td class="py-2.5 px-2 text-white">—</td>
-                      <td class="py-2.5 px-2 text-right">
-                        <button class="zx-btn secondary text-[11px] py-1 px-2" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
+                    <tr class="hover:bg-white/5 transition-colors">
+                      <td class="py-3 px-4 font-bold text-emerald-400">TXT</td>
+                      <td class="py-3 px-4 text-white">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></td>
+                      <td class="py-3 px-4 text-cyan-300 font-bold">v=spf1 include:amazonses.com ~all</td>
+                      <td class="py-3 px-4 text-white/40">—</td>
+                      <td class="py-3 px-4 text-right">
+                        <button class="zx-btn secondary text-[11px] py-1 px-2.5 whitespace-nowrap" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
                           {{ copiedField === `spf-${d.id}` ? '✓ Copied' : 'Copy Value' }}
                         </button>
                       </td>
