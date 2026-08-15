@@ -255,50 +255,62 @@ async function removeAddr(a) {
                 </p>
               </div>
 
-              <!-- Sleek Card-Based DNS Records (NO TABLES) -->
-              <div class="space-y-3">
-                <!-- MX Record Card -->
-                <div class="zx-record-card p-4 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-4">
-                  <div class="flex items-center gap-3">
-                    <span class="zx-badge-mx">MX</span>
-                    <div>
-                      <div class="text-[11px] text-white/40 uppercase tracking-wider">Host / Name</div>
-                      <code class="text-white text-xs font-mono">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></code>
-                    </div>
-                  </div>
+              <!-- Executive DNS Records Table with Generous Padding & Grid Borders -->
+              <div class="rounded-xl border border-white/15 overflow-hidden shadow-2xl bg-slate-950/80 mb-6">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-900 border-b border-white/15 text-white/70 text-xs font-bold uppercase tracking-wider">
+                      <th class="py-4 px-6 w-24 border-r border-white/10">Type</th>
+                      <th class="py-4 px-6 w-1/4 border-r border-white/10">Host / Name</th>
+                      <th class="py-4 px-6 border-r border-white/10">Value / Target</th>
+                      <th class="py-4 px-6 w-28 border-r border-white/10 text-center">Priority</th>
+                      <th class="py-4 px-6 text-right w-36">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-white/10 font-mono text-xs">
+                    <!-- MX Record -->
+                    <tr class="hover:bg-cyan-500/5 transition-colors">
+                      <td class="py-4 px-6 border-r border-white/10">
+                        <span class="zx-badge-mx">MX</span>
+                      </td>
+                      <td class="py-4 px-6 text-white font-bold border-r border-white/10">
+                        @ <span class="text-white/40 font-sans text-xs font-normal">(or {{ d.domain }})</span>
+                      </td>
+                      <td class="py-4 px-6 text-cyan-300 font-bold border-r border-white/10">
+                        inbound.resend.com
+                      </td>
+                      <td class="py-4 px-6 text-amber-400 font-bold border-r border-white/10 text-center">
+                        10
+                      </td>
+                      <td class="py-4 px-6 text-right">
+                        <button class="zx-btn secondary text-xs py-1.5 px-3 whitespace-nowrap shadow-sm" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
+                          {{ copiedField === `mx-${d.id}` ? '✓ Copied' : '📋 Copy Target' }}
+                        </button>
+                      </td>
+                    </tr>
 
-                  <div class="flex-1 min-w-[200px]">
-                    <div class="text-[11px] text-white/40 uppercase tracking-wider mb-0.5">Target Value</div>
-                    <div class="flex items-center gap-2">
-                      <code class="text-cyan-300 text-xs font-mono font-bold">inbound.resend.com</code>
-                      <span class="text-[11px] text-amber-400/80 font-mono bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Priority 10</span>
-                    </div>
-                  </div>
-
-                  <button class="zx-btn secondary text-xs shrink-0" @click="copyText('inbound.resend.com', `mx-${d.id}`)">
-                    {{ copiedField === `mx-${d.id}` ? '✓ Copied' : '📋 Copy Target' }}
-                  </button>
-                </div>
-
-                <!-- TXT SPF Record Card -->
-                <div class="zx-record-card p-4 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-4">
-                  <div class="flex items-center gap-3">
-                    <span class="zx-badge-txt">TXT</span>
-                    <div>
-                      <div class="text-[11px] text-white/40 uppercase tracking-wider">Host / Name</div>
-                      <code class="text-white text-xs font-mono">@ <span class="text-white/40 font-sans text-[11px]">(or {{ d.domain }})</span></code>
-                    </div>
-                  </div>
-
-                  <div class="flex-1 min-w-[200px]">
-                    <div class="text-[11px] text-white/40 uppercase tracking-wider mb-0.5">TXT Value (SPF Deliverability)</div>
-                    <code class="text-cyan-300 text-xs font-mono font-bold">v=spf1 include:amazonses.com ~all</code>
-                  </div>
-
-                  <button class="zx-btn secondary text-xs shrink-0" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
-                    {{ copiedField === `spf-${d.id}` ? '✓ Copied' : '📋 Copy Value' }}
-                  </button>
-                </div>
+                    <!-- SPF Record -->
+                    <tr class="hover:bg-cyan-500/5 transition-colors">
+                      <td class="py-4 px-6 border-r border-white/10">
+                        <span class="zx-badge-txt">TXT</span>
+                      </td>
+                      <td class="py-4 px-6 text-white font-bold border-r border-white/10">
+                        @ <span class="text-white/40 font-sans text-xs font-normal">(or {{ d.domain }})</span>
+                      </td>
+                      <td class="py-4 px-6 text-emerald-300 font-bold border-r border-white/10">
+                        v=spf1 include:amazonses.com ~all
+                      </td>
+                      <td class="py-4 px-6 text-white/30 border-r border-white/10 text-center">
+                        —
+                      </td>
+                      <td class="py-4 px-6 text-right">
+                        <button class="zx-btn secondary text-xs py-1.5 px-3 whitespace-nowrap shadow-sm" @click="copyText('v=spf1 include:amazonses.com ~all', `spf-${d.id}`)">
+                          {{ copiedField === `spf-${d.id}` ? '✓ Copied' : '📋 Copy Value' }}
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               <!-- Resend Inbound Webhook Instructions -->
