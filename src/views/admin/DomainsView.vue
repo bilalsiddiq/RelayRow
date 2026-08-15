@@ -16,7 +16,7 @@ const domains = ref([])
 const addresses = ref([])
 const openDomainId = ref(null)
 
-const newDomain = ref({ domain: '', label: '', default_from_name: '', unknown_recipient: 'bounce' })
+const newDomain = ref({ domain: '', label: '', default_from_name: '', unknown_recipient: 'catch_all' })
 const newAddr = ref({ address: '', display_name: '', is_catch_all: false })
 const domainKeyInput = ref({})
 
@@ -48,7 +48,7 @@ async function addDomain() {
   try {
     await saveDomain(newDomain.value)
     notice.value = 'Domain added successfully!'
-    newDomain.value = { domain: '', label: '', default_from_name: '', unknown_recipient: 'bounce' }
+    newDomain.value = { domain: '', label: '', default_from_name: '', unknown_recipient: 'catch_all' }
     await loadData()
   } catch (err) {
     error.value = err.message || 'Failed to add domain'
